@@ -17,3 +17,7 @@ val ColorBottomBarBackground = Color(0xFF696F75)
 val ColorBottomBarIndicatorColor = Color.Gray//Color(0xFF6200EE)
 val ColorBottomBarSelectedItemLabel = ColorSelected
 val ColorBottomBarUnselectedItemLabel = ColorUnselected
+val ColorMessageAlertBackground = ColorBottomBarBackground
+val ColorError = Color(0xFFAB1308)
+val ColorWarning = Color(0xFFAB6803)
+val ColorOutlinedTextBorder = ColorBottomBarBackground

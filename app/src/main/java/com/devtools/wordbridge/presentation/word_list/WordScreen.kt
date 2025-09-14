@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.devtools.wordbridge.domain.model.Word
 import com.devtools.wordbridge.presentation.ui.navigation.RememberBottomBarScrollState
+import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorder
 
 @Composable
 fun WordScreen(
@@ -39,30 +40,12 @@ fun WordScreenContent(
 
     val listState = rememberLazyListState()
     var lastScrollOffset by remember { mutableStateOf(0) }
-    RememberBottomBarScrollState(listState) { visible -> onBottomBarVisibilityChange(visible) }
-
-    // Listen to scroll changes
-//    LaunchedEffect(listState) {
-//        snapshotFlow {
-//            listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset
-//        }.collect { (index, offset) ->
-//            val currentPosition = index * 1000 + offset // normalize index + offset
-//            if (currentPosition > lastScrollOffset + 20) {
-//                // scrolling down → hide bottom bar
-//                onBottomBarVisibilityChange(true)
-//                lastScrollOffset = currentPosition
-//            } else if (currentPosition < lastScrollOffset - 20) {
-//                // scrolling up → show bottom bar
-//                onBottomBarVisibilityChange(false)
-//                lastScrollOffset = currentPosition
-//            }
-//        }
-//    }
+    RememberBottomBarScrollState(listState, autoHideDelay = 2000L) { visible -> onBottomBarVisibilityChange(visible) }
 
     Column(modifier = modifier
         .fillMaxSize()
         .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)) {
-        Text("Words", style = MaterialTheme.typography.headlineMedium)
+        Text("Words", color = ColorOutlinedTextBorder, style = MaterialTheme.typography.headlineMedium)
 
         LazyColumn(state = listState) {
             items(words) { word ->
@@ -79,6 +62,9 @@ fun WordScreenContent(
                         Text("Pronunciation: ${word.secondaryWordPronunciation}")
                     }
                 }
+            }
+            item {
+                Spacer(Modifier.height(16.dp)) // match your bottom bar height
             }
         }
     }

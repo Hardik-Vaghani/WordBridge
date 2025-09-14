@@ -2,23 +2,30 @@ package com.devtools.wordbridge.presentation.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -26,23 +33,31 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
 import com.devtools.wordbridge.presentation.settings.SettingsScreen
+import com.devtools.wordbridge.presentation.ui.theme.BounceZoomAnimation
 import com.devtools.wordbridge.presentation.ui.theme.ColorBottomBarBackground
 import com.devtools.wordbridge.presentation.ui.theme.ColorBottomBarIndicatorColor
 import com.devtools.wordbridge.presentation.ui.theme.ColorBottomBarSelectedItemLabel
 import com.devtools.wordbridge.presentation.ui.theme.ColorBottomBarUnselectedItemLabel
+import com.devtools.wordbridge.presentation.ui.theme.ScaleInScaleOut
+import com.devtools.wordbridge.presentation.ui.theme.ShakeAnimation
 import com.devtools.wordbridge.presentation.widget_settings_screen.WidgetSettingsScreen
 import com.devtools.wordbridge.presentation.word_add.WordAddScreen
 import com.devtools.wordbridge.presentation.word_list.WordScreen
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -129,58 +144,19 @@ fun AppNavHostWithDefault() {
     }
 }
 
-/*
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
-    val primaryBottomItems = listOf(BottomNavItem.Words, BottomNavItem.Settings)
-    val secondaryBottomItems = listOf(BottomNavItem.WordAdd, BottomNavItem.WidgetSetting)
+    val primaryBottomItems = listOf(BottomNavItem.Words, BottomNavItem.WordAdd)
+    val secondaryBottomItems = listOf(BottomNavItem.WidgetSetting, BottomNavItem.Settings)
     var bottomBarVisible by remember { mutableStateOf(true) }
     val currentRoute by navController.currentBackStackEntryAsState()
 
-    Scaffold { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding), contentAlignment = Alignment.BottomStart) {
-            NavHost(navController, startDestination = BottomNavItem.Words.route) {
-                composable(BottomNavItem.Words.route) { WordScreen { visible -> bottomBarVisible = visible } }
-                composable(BottomNavItem.Settings.route) { SettingsScreen() }
-//                composable(BottomNavItem.WordAdd.route) { WordAddScreen() }
-//                composable(BottomNavItem.WidgetSetting.route) { WidgetSettingsScreen() }
-            }
-            FloatingBottomBar(
-                items = primaryBottomItems,
-                currentRoute = currentRoute?.destination?.route,
-                onItemClick = { item -> navController.navigate(item.route) { launchSingleTop = true; restoreState = true } },
-                visible = bottomBarVisible
-            )
-        }
-        Box(modifier = Modifier.padding(innerPadding), contentAlignment = Alignment.BottomEnd) {
-            NavHost(navController, startDestination = BottomNavItem.Words.route) {
-                composable(BottomNavItem.WordAdd.route) { WordAddScreen() }
-                composable(BottomNavItem.WidgetSetting.route) { WidgetSettingsScreen() }
-            }
-            FloatingBottomBar1(
-                items = primaryBottomItems,
-                currentRoute = currentRoute?.destination?.route,
-                onItemClick = { item -> navController.navigate(item.route) { launchSingleTop = true; restoreState = true } },
-                visible = bottomBarVisible
-            )
-        }
-    }
-}
-*/
-
-@Composable
-fun AppNavHost() {
-    val navController = rememberNavController()
-    val primaryBottomItems = listOf(BottomNavItem.Words, BottomNavItem.Settings)
-    val secondaryBottomItems = listOf(BottomNavItem.WordAdd, BottomNavItem.WidgetSetting)
-    var bottomBarVisible by remember { mutableStateOf(true) }
-    val currentRoute by navController.currentBackStackEntryAsState()
-
-    Scaffold { innerPadding ->
+    Scaffold(contentWindowInsets = WindowInsets(0)) { innerPadding : PaddingValues->
         Box(
             modifier = Modifier
                 .fillMaxSize()
+//                .background(color = Color(0xFFFF9800))
                 .padding(innerPadding)
         ) {
             // ---- NavHost (Single) ----
@@ -189,12 +165,10 @@ fun AppNavHost() {
                 startDestination = BottomNavItem.Words.route,
                 modifier = Modifier.fillMaxSize()
             ) {
-                composable(BottomNavItem.Words.route) {
-                    WordScreen { visible -> bottomBarVisible = visible }
-                }
-                composable(BottomNavItem.Settings.route) { SettingsScreen() }
-                composable(BottomNavItem.WordAdd.route) { WordAddScreen() }
+                composable(BottomNavItem.Words.route) { WordScreen { visible -> bottomBarVisible = visible } }
+                composable(BottomNavItem.WordAdd.route) { WordAddScreen { /*navController.popBackStack()*/ } }
                 composable(BottomNavItem.WidgetSetting.route) { WidgetSettingsScreen() }
+                composable(BottomNavItem.Settings.route) { SettingsScreen() }
             }
 
             // ---- Bottom Bars in ONE Row ----
@@ -205,37 +179,30 @@ fun AppNavHost() {
                     .align(Alignment.BottomCenter),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                when (currentRoute?.destination?.route) {
-                    in listOf(BottomNavItem.Words.route, BottomNavItem.Settings.route) -> {
-                        FloatingBottomBar(
-                            items = primaryBottomItems,
-                            currentRoute = currentRoute?.destination?.route,
-                            onItemClick = { item ->
-                                navController.navigate(item.route) {
-                                    launchSingleTop = true
-                                    restoreState = true
-                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                }
-                            },
-                            visible = bottomBarVisible
-                        )
-                    }
-
-                    in listOf(BottomNavItem.WordAdd.route, BottomNavItem.WidgetSetting.route) -> {
-                        FloatingBottomBar1(
-                            items = secondaryBottomItems,
-                            currentRoute = currentRoute?.destination?.route,
-                            onItemClick = { item ->
-                                navController.navigate(item.route) {
-                                    launchSingleTop = true
-                                    restoreState = true
-                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                }
-                            },
-                            visible = bottomBarVisible
-                        )
-                    }
-                }
+                FloatingBottomBar(
+                    items = primaryBottomItems,
+                    currentRoute = currentRoute?.destination?.route,
+                    onItemClick = { item ->
+                        navController.navigate(item.route) {
+                            launchSingleTop = true
+                            restoreState = true
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        }
+                    },
+                    visible = bottomBarVisible
+                )
+                FloatingBottomBar(
+                    items = secondaryBottomItems,
+                    currentRoute = currentRoute?.destination?.route,
+                    onItemClick = { item ->
+                        navController.navigate(item.route) {
+                            launchSingleTop = true
+                            restoreState = true
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        }
+                    },
+                    visible = bottomBarVisible
+                )
             }
         }
     }
@@ -266,8 +233,8 @@ fun FloatingBottomBar(
         val navBarHeight = 80.dp
         val navBarWidth = 208.dp //navBarHeight * 2.6f
         val itemHeight = 44.dp // approximate default height of NavigationBarItem content
-
         val verticalOffset = 26.dp
+
         NavigationBar(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -279,19 +246,43 @@ fun FloatingBottomBar(
         ) {
             items.forEach { item ->
                 val selected = currentRoute == item.route
+
                 NavigationBarItem(
-                    modifier = Modifier.height(itemHeight).offset( y = verticalOffset),
+                    modifier = Modifier.height(itemHeight /2),//.offset( y = verticalOffset),
                     selected = selected,
                     onClick = { onItemClick(item) },
                     icon = {
+                        BounceZoomAnimation(selected) { modifier ->
+//                        ShakeAnimation(trigger = selected) { modifier ->
                         val iconRes = if (selected) item.selectedIcon else item.unselectedIcon
-                        Icon(painter = painterResource(id = iconRes), contentDescription = item.label)
+                        Icon(
+                            painter = painterResource(id = iconRes),
+                            contentDescription = item.label,
+                            tint = Color.Unspecified,
+                            modifier = modifier
+//                            modifier = Modifier.bounceZoom(selected)
+//                                Modifier.graphicsLayer(
+//                                    scaleX = if (selected) 1.065f else 1f,
+//                                    scaleY = if (selected) 1.065f else 1f
+//                                ).animateContentSize()
+                        )
+                        }
                     },
-                    label = { Text(item.label) },
+                    label = {
+//                        BounceZoomAnimation(selected) { modifier ->
+//                        ShakeAnimation(trigger = selected) { modifier ->
+                        ScaleInScaleOut(selected = selected, loopCount = 1) { modifier ->
+                            Text(item.label,
+                                modifier = modifier,
+                                color = if (selected) ColorBottomBarSelectedItemLabel else ColorBottomBarUnselectedItemLabel,
+                                style = if (selected) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall
+                            )}
+                    },
                     colors = NavigationBarItemDefaults.colors(
+                        //selectedIconColor = Color.White, unselectedIconColor = Color.Gray,
                         selectedTextColor = ColorBottomBarSelectedItemLabel,
                         unselectedTextColor = ColorBottomBarUnselectedItemLabel,
-                        indicatorColor = ColorBottomBarIndicatorColor
+                        indicatorColor = Color.Transparent //ColorBottomBarIndicatorColor,
                     )
                 )
             }
@@ -317,59 +308,41 @@ fun RememberBottomBarScrollState(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun FloatingBottomBar1(
-    items: List<BottomNavItem>,
-    currentRoute: String?,
-    onItemClick: (BottomNavItem) -> Unit,
-    visible: Boolean
+fun RememberBottomBarScrollState(
+    listState: LazyListState,
+    threshold: Int = 20,
+    autoHideDelay: Long = 2500L, // 2.5s after showing
+    onVisibilityChange: (Boolean) -> Unit
 ) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = slideInVertically(
-            initialOffsetY = { it },
-            animationSpec = tween(350, easing = FastOutSlowInEasing)
-        ) + fadeIn(tween(250, easing = LinearOutSlowInEasing)),
-        exit = slideOutVertically(
-            targetOffsetY = { it },
-            animationSpec = tween(300, easing = FastOutSlowInEasing)
-        ) + fadeOut(tween(200, easing = LinearOutSlowInEasing)),
-        modifier = Modifier.padding(horizontal = 12.dp)
-    ) {
-        val navBarHeight = 80.dp
-        val navBarWidth = 208.dp //navBarHeight * 2.6f
-        val itemHeight = 44.dp // approximate default height of NavigationBarItem content
+    var lastPosition by remember { mutableStateOf(0) }
+    var job by remember { mutableStateOf<Job?>(null) }
+    val scope = rememberCoroutineScope()
 
-        val verticalOffset = 26.dp
-        NavigationBar(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .height(navBarHeight)
-                .width(navBarWidth)
-                .clip(RoundedCornerShape( 24.dp)),
-            containerColor = ColorBottomBarBackground,
-            tonalElevation = 0.dp
-        ) {
-            items.forEach { item ->
-                val selected = currentRoute == item.route
-                NavigationBarItem(
-                    modifier = Modifier.height(itemHeight).offset( y = verticalOffset),
-                    selected = selected,
-                    onClick = { onItemClick(item) },
-                    icon = {
-                        val iconRes = if (selected) item.selectedIcon else item.unselectedIcon
-                        Icon(painter = painterResource(id = iconRes), contentDescription = item.label)
-                    },
-                    label = { Text(item.label) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedTextColor = ColorBottomBarSelectedItemLabel,
-                        unselectedTextColor = ColorBottomBarUnselectedItemLabel,
-                        indicatorColor = ColorBottomBarIndicatorColor
-                    )
-                )
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+            .collect { (index, offset) ->
+                val current = index * 1000 + offset
+
+                when {
+                    current > lastPosition + threshold -> {
+                        // Scroll up → hide
+                        onVisibilityChange(false)
+                        job?.cancel()
+                    }
+                    current < lastPosition - threshold -> {
+                        // Scroll down → show then auto-hide
+                        onVisibilityChange(true)
+
+                        job?.cancel()
+                        job = scope.launch {
+                            delay(autoHideDelay)
+                            onVisibilityChange(false) // hide again
+                        }
+                    }
+                }
+
+                lastPosition = current
             }
-        }
     }
 }
-
