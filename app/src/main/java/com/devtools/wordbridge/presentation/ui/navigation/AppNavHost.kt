@@ -12,6 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -81,8 +82,15 @@ fun AppNavHostWithDefault() {
             {
                 NavigationBar(
                     modifier = Modifier
-                        .padding(start= 12.dp, end = 12.dp) // add margin from edges
-                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 24.dp, bottomEnd = 24.dp)), // round only top corners, // you can add padding/clip here
+                        .padding(start = 12.dp, end = 12.dp) // add margin from edges
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 24.dp,
+                                topEnd = 24.dp,
+                                bottomStart = 24.dp,
+                                bottomEnd = 24.dp
+                            )
+                        ), // round only top corners, // you can add padding/clip here
                     containerColor = ColorBottomBarBackground, // transparent background
                     tonalElevation = 0.dp, // removes shadow
                 ) {
@@ -165,13 +173,26 @@ fun AppNavHost() {
                 startDestination = BottomNavItem.Words.route,
                 modifier = Modifier.fillMaxSize()
             ) {
-                composable(BottomNavItem.Words.route) { WordScreen { visible -> bottomBarVisible = visible } }
+                composable(BottomNavItem.Words.route) {
+                    WordScreen(
+                        onBottomBarVisibilityChange = { visible ->
+                            bottomBarVisible = visible
+                        },
+                        onMenuNavigate = { route ->
+                            navController.navigate(route) {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
                 composable(BottomNavItem.WordAdd.route) { WordAddScreen { /*navController.popBackStack()*/ } }
                 composable(BottomNavItem.WidgetSetting.route) { WidgetSettingsScreen() }
                 composable(BottomNavItem.Settings.route) { SettingsScreen() }
             }
 
             // ---- Bottom Bars in ONE Row ----
+            /*
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -203,7 +224,7 @@ fun AppNavHost() {
                     },
                     visible = bottomBarVisible
                 )
-            }
+            }*/
         }
     }
 
@@ -240,7 +261,7 @@ fun FloatingBottomBar(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .height(navBarHeight)
                 .width(navBarWidth)
-                .clip(RoundedCornerShape( 24.dp)),
+                .clip(RoundedCornerShape(24.dp)),
             containerColor = ColorBottomBarBackground,
             tonalElevation = 0.dp
         ) {

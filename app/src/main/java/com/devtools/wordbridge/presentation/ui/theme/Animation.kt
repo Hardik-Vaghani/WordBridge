@@ -1,16 +1,28 @@
 package com.devtools.wordbridge.presentation.ui.theme
 
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntOffset
 import kotlin.math.roundToInt
@@ -194,4 +206,24 @@ fun ScaleInScaleOut(
     )
 }
 
+/** Animation enter */
+val enter_01 = slideInVertically(initialOffsetY = { it }) + fadeIn()
+val enter_02 = scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium))
+val enter_03 = scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+val enter_04 = slideInVertically(initialOffsetY = { it }) + scaleIn( animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+val enter_05 = scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+val enter_06 = scaleIn(initialScale = 0.8f) + fadeIn()
+val enter_07 = slideInHorizontally(initialOffsetX = { it }) + fadeIn()
+val enterBouncy = scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessVeryLow)) + fadeIn(animationSpec = tween(300))
+val enterBouncyHorizontal = (slideInHorizontally(initialOffsetX = { -it / 2 }, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)) + scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300)))
+
+/** Animation exit */
+val exit_01 = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+val exit_02 = scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium))
+val exit_03 = scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeOut(animationSpec = tween(300))
+val exit_04 = slideOutVertically(targetOffsetY = { it }) + scaleOut( animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeOut(animationSpec = tween(300))
+val exit_05 = scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeOut(animationSpec = tween(300))
+val exit_06 = scaleOut(targetScale = 0.8f) + fadeOut()
+val exit_07 = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) + fadeOut()
+val exitBouncy = scaleOut(targetScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)) + fadeOut(animationSpec = tween(150))
 

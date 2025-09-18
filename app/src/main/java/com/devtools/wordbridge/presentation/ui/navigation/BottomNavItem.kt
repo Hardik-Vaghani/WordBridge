@@ -18,6 +18,10 @@ sealed class BottomNavItem(
         R.drawable.ic_selected_add,  // selected
         R.drawable.ic_unselected_add  // unselected
     )
+    object Favorite : BottomNavItem("favorite", "Favorite",
+        R.drawable.ic_selected_favorite,  // selected
+        R.drawable.ic_unselected_favorite  // unselected
+    )
     object Settings : BottomNavItem("settings", "Settings",
         R.drawable.ic_selected_setting,  // selected
         R.drawable.ic_unselected_setting  // unselected

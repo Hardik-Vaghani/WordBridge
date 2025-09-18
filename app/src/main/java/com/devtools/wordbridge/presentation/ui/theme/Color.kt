@@ -21,3 +21,10 @@ val ColorMessageAlertBackground = ColorBottomBarBackground
 val ColorError = Color(0xFFAB1308)
 val ColorWarning = Color(0xFFAB6803)
 val ColorOutlinedTextBorder = ColorBottomBarBackground
+val ColorOutlinedTextBorderActive = ColorSelected
+val ColorOutlinedTextBorderDeActive = ColorUnselected
+
+val ColorIconBorderSelectedItem = ColorSelected
+val ColorIconBorderUnselectedItem = ColorUnselected
+val ColorDividerSeparator = ColorUnselected
+
