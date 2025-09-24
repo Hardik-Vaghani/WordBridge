@@ -1,4 +1,4 @@
-package com.devtools.wordbridge.presentation.word_add
+package com.devtools.wordbridge.presentation.screen.word_add
 
 sealed class WordValidationMessage {
     data class Error(val message: String) : WordValidationMessage()

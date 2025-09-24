@@ -4,29 +4,29 @@ import androidx.annotation.DrawableRes
 import com.devtools.wordbridge.R
 
 
-sealed class BottomNavItem(
+sealed class NavItem(
     val route: String,
     val label: String,
     @DrawableRes val selectedIcon: Int,
     @DrawableRes val unselectedIcon: Int
 ) {
-    object Words : BottomNavItem("words", "Words",
+    object Words : NavItem("words", "Words",
         R.drawable.ic_selected_word,     // selected
         R.drawable.ic_unselected_word     // unselected
     )
-    object WordAdd : BottomNavItem("word_add", "Add",
+    object WordAdd : NavItem("word_add", "Add",
         R.drawable.ic_selected_add,  // selected
         R.drawable.ic_unselected_add  // unselected
     )
-    object Favorite : BottomNavItem("favorite", "Favorite",
+    object Favorite : NavItem("favorite", "Favorite",
         R.drawable.ic_selected_favorite,  // selected
         R.drawable.ic_unselected_favorite  // unselected
     )
-    object Settings : BottomNavItem("settings", "Settings",
+    object Settings : NavItem("settings", "Settings",
         R.drawable.ic_selected_setting,  // selected
         R.drawable.ic_unselected_setting  // unselected
     )
-    object WidgetSetting : BottomNavItem("widget_setting", "Widget",
+    object WidgetSetting : NavItem("widget_setting", "Widget",
         R.drawable.ic_selected_setting,  // selected
         R.drawable.ic_unselected_setting  // unselected
     )

@@ -1,4 +1,4 @@
-package com.devtools.wordbridge.presentation.word_add
+package com.devtools.wordbridge.presentation.screen.word_add
 
 data class AddWordUiState(
     val word: String = "",

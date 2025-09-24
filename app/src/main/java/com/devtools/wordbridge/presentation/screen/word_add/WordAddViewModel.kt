@@ -1,4 +1,4 @@
-package com.devtools.wordbridge.presentation.word_add
+package com.devtools.wordbridge.presentation.screen.word_add
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -34,10 +34,15 @@ class WordAddViewModel @Inject constructor(
     private val _pronunciation = MutableStateFlow("")
     val pronunciation = _pronunciation.asStateFlow()
 
+    private val _isFavorite = MutableStateFlow(false)
+    val isFavorite = _isFavorite.asStateFlow()
+
     fun onWordChanged(newWord: String) { _word.value = newWord }
     fun onMeaningChanged(newMeaning: String) { _meaning.value = newMeaning }
     fun onTranslationChanged(newTranslation: String) { _translation.value = newTranslation }
     fun onPronunciationChanged(newPronunciation: String) { _pronunciation.value = newPronunciation }
+
+    fun onToggleFavourite(newFavorite: Boolean) { _isFavorite.value = newFavorite }
 
     fun saveWord(onSaved: (OperationStatus<Word>?) -> Unit = {}) {
         viewModelScope.launch {
@@ -46,7 +51,8 @@ class WordAddViewModel @Inject constructor(
                 primaryWord = _word.value,
                 wordMeaning = _meaning.value,
                 secondaryWord = _translation.value,
-                secondaryWordPronunciation = _pronunciation.value
+                secondaryWordPronunciation = _pronunciation.value,
+                isFavorite = _isFavorite.value
             )
 
             val result: OperationStatus<Word> = addWordUseCase(newWord)
@@ -64,5 +70,6 @@ class WordAddViewModel @Inject constructor(
         _meaning.value = ""
         _translation.value = ""
         _pronunciation.value = ""
+        _isFavorite.value = false
     }
 }

@@ -6,7 +6,6 @@ import com.devtools.wordbridge.data.local.WordEntity
 import com.devtools.wordbridge.domain.common.OperationStatus
 import com.devtools.wordbridge.domain.model.Word
 import com.devtools.wordbridge.domain.repository.WordRepository
-import com.devtools.wordbridge.presentation.word_add.WordValidationMessage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -46,5 +45,5 @@ class WordRepositoryImpl(
 }
 
 // Mapping extensions
-fun WordEntity.toDomain() = Word(id, primaryWord, wordMeaning, secondaryWord, secondaryWordPronunciation)
-fun Word.toEntity() = WordEntity(id, primaryWord, wordMeaning, secondaryWord, secondaryWordPronunciation)
+fun WordEntity.toDomain() = Word(id, primaryWord, wordMeaning, secondaryWord, secondaryWordPronunciation, isFavorite)
+fun Word.toEntity() = WordEntity(id, primaryWord, wordMeaning, secondaryWord, secondaryWordPronunciation, isFavorite)

@@ -4,6 +4,7 @@ package com.devtools.wordbridge.app.di
 import android.content.Context
 import androidx.room.Room
 import com.devtools.wordbridge.data.WordRepositoryImpl
+import com.devtools.wordbridge.data.local.MIGRATION_1_2
 import com.devtools.wordbridge.data.local.WordDao
 import com.devtools.wordbridge.data.local.WordDatabase
 import com.devtools.wordbridge.domain.repository.WordRepository
@@ -24,7 +25,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext app: Context): WordDatabase =
-        Room.databaseBuilder(app, WordDatabase::class.java, "word_db").build()
+        Room.databaseBuilder(app, WordDatabase::class.java, "word_db")
+            .addMigrations(MIGRATION_1_2) // add your migrations here too!
+            .build()
 
     @Provides
     fun provideWordDao(db: WordDatabase): WordDao = db.wordDao()

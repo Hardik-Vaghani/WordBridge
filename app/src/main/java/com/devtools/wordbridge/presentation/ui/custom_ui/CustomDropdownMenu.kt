@@ -1,9 +1,8 @@
-package com.devtools.wordbridge.presentation.ui
+package com.devtools.wordbridge.presentation.ui.custom_ui
 
 import androidx.annotation.DrawableRes
 import com.devtools.wordbridge.R
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,13 +10,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -32,27 +28,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.vectorResource
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
-import com.devtools.wordbridge.presentation.ui.theme.ColorDividerSeparator
-import com.devtools.wordbridge.presentation.ui.theme.enter_01
+import com.devtools.wordbridge.presentation.ui.theme.ColorDividerSeparator_1
+import com.devtools.wordbridge.presentation.ui.theme.ColorDividerSeparator_2
 import com.devtools.wordbridge.presentation.ui.theme.enter_03
-import com.devtools.wordbridge.presentation.ui.theme.enter_05
-import com.devtools.wordbridge.presentation.ui.theme.enter_07
-import com.devtools.wordbridge.presentation.ui.theme.exitBouncy
 import com.devtools.wordbridge.presentation.ui.theme.exit_03
-import com.devtools.wordbridge.presentation.ui.theme.exit_07
 import kotlinx.coroutines.delay
 
 data class CustomMenuItem(
@@ -184,21 +173,13 @@ private fun AnimatedItem(
 
             // dotted separator
             if (showDivider) {
-                Canvas(Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(1.dp)) {
-                    val width = size.width
-                    val dotSpacing = 3.dp.toPx()
-                    val dotRadius = 1.dp.toPx()
-                    var x = 0f
-                    while (x < width) {
-                        drawCircle(
-                            color = ColorDividerSeparator.copy(alpha = 0.3f),
-                            radius = dotRadius,
-                            center = Offset(x, 0f),
-
-                        )
-                        x += dotSpacing
-                    }
-                }
+                DottedHorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = ColorDividerSeparator_2.copy(alpha = 0.5f),
+                    thickness = 0.7.dp,
+                    dashLength = 6f,
+                    gapLength = 6f
+                )
             }
         }
     }

@@ -1,5 +1,8 @@
-package com.devtools.wordbridge.presentation.word_add
+package com.devtools.wordbridge.presentation.screen.word_add
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -11,17 +14,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.devtools.wordbridge.R
 import com.devtools.wordbridge.domain.common.OperationStatus
 import com.devtools.wordbridge.domain.model.Word
-import com.devtools.wordbridge.presentation.ui.MessageAlert
-import com.devtools.wordbridge.presentation.ui.theme.ColorBottomBarBackground
+import com.devtools.wordbridge.presentation.ui.custom_ui.MessageAlert
 import com.devtools.wordbridge.presentation.ui.theme.ColorError
+import com.devtools.wordbridge.presentation.ui.theme.ColorIconBorderUnselectedItem
 import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorder
 import com.devtools.wordbridge.presentation.ui.theme.ColorSelected
 import com.devtools.wordbridge.presentation.ui.theme.ColorWarning
@@ -30,7 +36,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun WordAddScreen(
     viewModel: WordAddViewModel = hiltViewModel(),
-    onWordSaved: () -> Unit = {}
+    onWordSaved: () -> Unit = {},
+    onBackClicked: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     var alertMessage by remember { mutableStateOf<String?>(null) }
@@ -40,7 +47,7 @@ fun WordAddScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(
@@ -61,7 +68,28 @@ fun WordAddScreen(
 
                     val focusManager = LocalFocusManager.current
 
-                    Text("Add word", color = ColorOutlinedTextBorder, style = MaterialTheme.typography.headlineMedium)
+                    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("Add word", color = ColorOutlinedTextBorder, style = MaterialTheme.typography.headlineMedium)
+                        Row(modifier = Modifier.fillMaxWidth().height(33.dp), horizontalArrangement = Arrangement.End) {
+
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                onClick = { onBackClicked()}
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.ic_back),
+                                    //                        painter = rememberVectorPainter(image = Icons.Default.Search),
+                                    contentDescription = "Back button",
+                                    modifier = Modifier
+                                        .size(width = 64.dp, height = 32.dp)
+                                        .background(color = Color.Transparent)
+                                        .border(width = 1.dp, color = ColorIconBorderUnselectedItem, shape = RoundedCornerShape(8.dp))
+                                        .padding(4.dp),
+                                    colorFilter = ColorFilter.tint(ColorIconBorderUnselectedItem)
+                                )
+                            }
+                        }
+                    }
 
                     var isErrorOfWord by remember { mutableStateOf(false) }
                     var onFocusedOfWord by remember { mutableStateOf(false) }

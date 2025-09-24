@@ -10,5 +10,6 @@ data class WordEntity(
     val primaryWord: String,
     val wordMeaning: String,
     val secondaryWord: String,
-    val secondaryWordPronunciation: String
+    val secondaryWordPronunciation: String,
+    val isFavorite: Boolean = false
 )

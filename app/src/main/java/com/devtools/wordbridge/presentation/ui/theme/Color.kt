@@ -26,5 +26,7 @@ val ColorOutlinedTextBorderDeActive = ColorUnselected
 
 val ColorIconBorderSelectedItem = ColorSelected
 val ColorIconBorderUnselectedItem = ColorUnselected
-val ColorDividerSeparator = ColorUnselected
+val ColorDividerSeparator_1 = ColorUnselected
+val ColorDividerSeparator_2 = ColorSelected
+val ColorItemBackground = Color(0xFF696F75)
 
