@@ -9,4 +9,6 @@ interface WordRepository {
     suspend fun insertWord(word: Word): OperationStatus<Word>
     suspend fun deleteWord(word: Word): OperationStatus<Word>
     fun getAllWords(): Flow<List<Word>>
+    fun getAllFavoriteWords(): Flow<List<Word>>
+    fun getWord(id: Int): Flow<Word>
 }

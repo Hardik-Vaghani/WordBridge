@@ -42,6 +42,14 @@ class WordRepositoryImpl(
     override fun getAllWords(): Flow<List<Word>> {
         return dao.getAllWords().map { list -> list.map { it.toDomain() } }
     }
+
+    override fun getAllFavoriteWords(): Flow<List<Word>> {
+        return dao.getAllFavoriteWords().map { list -> list.map { it.toDomain() } }
+    }
+
+    override fun getWord(id: Int): Flow<Word> {
+        return dao.getWord(id).map { it.toDomain() }
+    }
 }
 
 // Mapping extensions

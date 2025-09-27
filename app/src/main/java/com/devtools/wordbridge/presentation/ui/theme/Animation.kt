@@ -1,6 +1,5 @@
 package com.devtools.wordbridge.presentation.ui.theme
 
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
@@ -8,10 +7,12 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -22,7 +23,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntOffset
 import kotlin.math.roundToInt
@@ -206,24 +206,137 @@ fun ScaleInScaleOut(
     )
 }
 
-/** Animation enter */
-val enter_01 = slideInVertically(initialOffsetY = { it }) + fadeIn()
-val enter_02 = scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium))
-val enter_03 = scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
-val enter_04 = slideInVertically(initialOffsetY = { it }) + scaleIn( animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
-val enter_05 = scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
-val enter_06 = scaleIn(initialScale = 0.8f) + fadeIn()
-val enter_07 = slideInHorizontally(initialOffsetX = { it }) + fadeIn()
-val enterBouncy = scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessVeryLow)) + fadeIn(animationSpec = tween(300))
-val enterBouncyHorizontal = (slideInHorizontally(initialOffsetX = { -it / 2 }, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)) + scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300)))
+/**
+ * ENTER ANIMATIONS
+ */
 
-/** Animation exit */
-val exit_01 = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-val exit_02 = scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium))
-val exit_03 = scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeOut(animationSpec = tween(300))
-val exit_04 = slideOutVertically(targetOffsetY = { it }) + scaleOut( animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeOut(animationSpec = tween(300))
-val exit_05 = scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeOut(animationSpec = tween(300))
-val exit_06 = scaleOut(targetScale = 0.8f) + fadeOut()
-val exit_07 = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) + fadeOut()
-val exitBouncy = scaleOut(targetScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)) + fadeOut(animationSpec = tween(150))
+// Slide Animations
+val enterSlideUp = slideInVertically(initialOffsetY = { it }) + fadeIn()
+val enterSlideDown = slideInVertically { fullHeight -> -fullHeight } + fadeIn()
+val enterSlideLeft = slideInHorizontally(initialOffsetX = { it }) + fadeIn()
+val enterSlideRight = slideInHorizontally { fullWidth -> -fullWidth } + fadeIn()
 
+// Scale Animations
+val enterScaleSimple = scaleIn() + fadeIn()
+val enterScaleNoBounce = scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium))
+val enterScaleMediumBounce = scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+val enterScaleInitialSmall = scaleIn(initialScale = 0.8f) + fadeIn()
+val enterScaleLowBounce = scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+
+// Expand Animations
+val enterExpandVertical = expandVertically() + fadeIn()
+
+// Combined Slide + Scale Animations
+val enterSlideUpScale = slideInVertically(initialOffsetY = { it }) + scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+
+val enterSlideDownHalfScale = slideInVertically { fullHeight -> -fullHeight / 2 } + scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+
+val enterSlideUpFullScale = slideInVertically { fullHeight -> fullHeight } + scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+
+val enterSlideUpThirdScale = slideInVertically { fullHeight -> fullHeight / 3 } + scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)) + fadeIn(animationSpec = tween(300))
+
+val enterSlideUpQuarterScale = slideInVertically { fullHeight -> fullHeight / 4 } + scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+
+
+// Special Bouncy Animations
+val enterSlideDownBouncy = slideInVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) { fullHeight -> -fullHeight / 2 } + fadeIn(animationSpec = tween(300))
+
+val enterSlideUpBouncy = slideInVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) { fullHeight -> fullHeight } + fadeIn(animationSpec = tween(300))
+
+val enterBouncyVeryLow = scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessVeryLow)) + fadeIn(animationSpec = tween(300))
+
+val enterBouncyHorizontal = slideInHorizontally(initialOffsetX = { -it / 2 }, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)) + scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)) + fadeIn(animationSpec = tween(300))
+
+/**
+ * EXIT ANIMATIONS
+ */
+
+// Slide Animations
+val exitSlideDown = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+val exitSlideUp = slideOutVertically { fullHeight -> -fullHeight } + fadeOut()
+val exitSlideRight = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) + fadeOut()
+val exitSlideLeft = slideOutHorizontally { fullWidth -> -fullWidth } + fadeOut()
+
+// Scale Animations
+val exitScaleSimple = scaleOut() + fadeOut()
+val exitScaleNoBounce = scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium))
+val exitScaleMediumBounce = scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeOut(animationSpec = tween(300))
+val exitScaleTargetSmall = scaleOut(targetScale = 0.8f) + fadeOut()
+val exitScaleNoBounceSmall = scaleOut(targetScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)) + fadeOut(animationSpec = tween(150))
+
+// Shrink Animations
+val exitShrinkVertical = shrinkVertically() + fadeOut()
+
+// Combined Slide + Scale Animations
+val exitSlideDownScale = slideOutVertically(targetOffsetY = { it }) + scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeOut(animationSpec = tween(300))
+
+val exitSlideDownHalfScale = slideOutVertically { fullHeight -> -fullHeight / 2 } + scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeOut(animationSpec = tween(300))
+
+val exitSlideUpFullScale = slideOutVertically { fullHeight -> fullHeight } + scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeOut(animationSpec = tween(300))
+
+val exitSlideUpThirdScale = slideOutVertically { fullHeight -> fullHeight / 3 } + scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)) + fadeOut(animationSpec = tween(300))
+
+val exitSlideUpQuarterScale = slideOutVertically { fullHeight -> fullHeight / 4 } + scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)) + fadeOut(animationSpec = tween(300))
+
+// Special Bouncy Animations
+val exitSlideDownBouncy = slideOutVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium)) { fullHeight -> -fullHeight / 2 } + fadeOut(animationSpec = tween(150))
+val exitSlideUpBouncy = slideOutVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium)) { fullHeight -> fullHeight } + fadeOut(animationSpec = tween(150))
+
+// Special Exit Variations
+val exitScaleDownThreshold = scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow, visibilityThreshold = 0.01f)) + fadeOut(animationSpec = tween(300))
+
+/**
+ * ANIMATION PAIRS (Enter + Exit combinations)
+ */
+
+// Mirror Pairs (Enter and Exit are symmetrical)
+val animationPairSlideUpDown = enterSlideUp to exitSlideDown
+val animationPairSlideDownUp = enterSlideDown to exitSlideUp
+val animationPairSlideLeftRight = enterSlideLeft to exitSlideRight
+val animationPairSlideRightLeft = enterSlideRight to exitSlideLeft
+val animationPairSlideRightRight = enterSlideRight to exitSlideRight
+val animationPairSlideLeftLeft = enterSlideLeft to exitSlideLeft
+
+val animationPairScaleSimple = enterScaleSimple to exitScaleSimple
+val animationPairScaleNoBounce = enterScaleNoBounce to exitScaleNoBounce
+val animationPairScaleMediumBounce = enterScaleMediumBounce to exitScaleMediumBounce
+val animationPairScaleInitialSmall = enterScaleInitialSmall to exitScaleTargetSmall
+
+val animationPairExpandShrink = enterExpandVertical to exitShrinkVertical
+
+// Combined Slide + Scale Pairs
+val animationPairSlideUpScale = enterSlideUpScale to exitSlideDownScale
+val animationPairSlideDownHalfScale = enterSlideDownHalfScale to exitSlideDownHalfScale
+val animationPairSlideUpFullScale = enterSlideUpFullScale to exitSlideUpFullScale
+val animationPairSlideUpThirdScale = enterSlideUpThirdScale to exitSlideUpThirdScale
+val animationPairSlideUpQuarterScale = enterSlideUpQuarterScale to exitSlideUpQuarterScale
+
+// Special Bouncy Pairs
+val animationPairBouncyVeryLow = enterBouncyVeryLow to exitScaleNoBounceSmall
+val animationPairBouncyHorizontal = enterBouncyHorizontal to exitSlideLeft
+
+// Contrast Pairs (Enter and Exit in different directions for dynamic effect)
+val animationPairSlideUpSlideLeft = enterSlideUp to exitSlideLeft
+val animationPairSlideDownSlideRight = enterSlideDown to exitSlideRight
+val animationPairScaleSlideLeft = enterScaleMediumBounce to exitSlideLeft
+val animationPairBouncyScaleDown = enterBouncyVeryLow to exitScaleDownThreshold
+val animationPairBouncyUpScale = enterSlideDownBouncy to exitShrinkVertical
+val animationPairBouncyScale = enterScaleMediumBounce to exitShrinkVertical
+val animationPairBouncySlideMenu = enterScaleMediumBounce to exitScaleMediumBounce
+
+
+/**
+ * QUICK ACCESS PRESETS
+ */
+
+// Quick presets for common use cases
+val presetQuickFade = enterScaleSimple to exitScaleSimple
+val presetSlideUp = enterSlideUp to exitSlideDown
+val presetBouncyScale = enterScaleMediumBounce to exitScaleMediumBounce
+val presetSmoothExpand = enterExpandVertical to exitShrinkVertical
+val presetDynamicContrast = enterSlideUp to exitSlideLeft
+
+// Dropdown specific presets
+val presetDropdownBouncy = enterSlideUpQuarterScale to exitSlideUpQuarterScale
+val presetDropdownSmooth = enterSlideUpThirdScale to exitSlideUpThirdScale
+val presetDropdownQuick = enterSlideDownHalfScale to exitSlideDownHalfScale

@@ -15,57 +15,72 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 //import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.devtools.wordbridge.domain.action.WordAction
+import androidx.navigation.NavController
+import com.devtools.wordbridge.core.action.Action
 import com.devtools.wordbridge.domain.model.Word
-import com.devtools.wordbridge.presentation.ui.custom_ui.CustomDropdownMenu
+import com.devtools.wordbridge.presentation.action.UiActions
+import com.devtools.wordbridge.presentation.ui.custom_ui.ActionItem
+import com.devtools.wordbridge.presentation.ui.custom_ui.BottomActionBar
+import com.devtools.wordbridge.presentation.ui.custom_ui.FloatingOptionMenu
+import com.devtools.wordbridge.presentation.ui.custom_ui.HVDropdownMenu
 import com.devtools.wordbridge.presentation.ui.custom_ui.WordItemRow
-import com.devtools.wordbridge.presentation.ui.custom_ui.myItemsList
+import com.devtools.wordbridge.presentation.ui.custom_ui.menuItems
 import com.devtools.wordbridge.presentation.ui.navigation.RememberBottomBarScrollState
 import com.devtools.wordbridge.presentation.ui.theme.ColorIconBorderSelectedItem
 import com.devtools.wordbridge.presentation.ui.theme.ColorIconBorderUnselectedItem
 import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorder
 import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorderActive
 import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorderDeActive
-import com.devtools.wordbridge.presentation.ui.theme.enter_03
-import com.devtools.wordbridge.presentation.ui.theme.exitBouncy
 import com.devtools.wordbridge.presentation.ui.custom_ui.toIntRect
+import com.devtools.wordbridge.presentation.ui.theme.animationPairBouncyScale
 
 @Composable
 fun WordScreen(
     modifier: Modifier = Modifier,
-    viewModel: WordViewModel = hiltViewModel(),
     onScrollVisibilityChangeOnOption: (Boolean) -> Unit = {},
-    onMenuNavigate: (String) -> Unit = {}
+    onMenuNavigate: (String) -> Unit = {},
+    navController: NavController? = null,
+    viewModel: WordViewModel
 ) {
-    val words = viewModel.words.collectAsState()
-    val expandedIds: Set<Int> by viewModel.uiExpandCollapseState
+    val words by viewModel.words.collectAsState()
+    val navigationEvent by viewModel.navigationEvent.collectAsState()
+
+    LaunchedEffect(navigationEvent) {
+        navigationEvent?.let { route ->
+            // Use the provided navController or the one from parameters
+            val controller = navController ?: return@LaunchedEffect
+            controller.navigate(route) {
+                launchSingleTop = true
+                restoreState = true
+            }
+            viewModel.clearNavigationEvent()
+        }
+    }
+
     WordScreenContent(
-        words = words.value,
+        words = words,
         modifier = modifier,
         onScrollVisibilityChangeOnOption = onScrollVisibilityChangeOnOption,
         onMenuNavigate = onMenuNavigate,
-        wordAction = { action -> viewModel.onAction(action) },
-        //onToggleFavourite = { id, isStarred -> viewModel.onAction(WordAction.ToggleFavourite(id, isStarred)) }
+        action = { action -> viewModel.onAction(action) },
+        viewModel = viewModel,
+        navController = navController
     )
 }
 
@@ -73,11 +88,11 @@ fun WordScreen(
 fun WordScreenContent(
     modifier: Modifier = Modifier,
     words: List<Word>,
-    viewModel: WordViewModel = hiltViewModel(),
+    viewModel: WordViewModel? = null,
     onScrollVisibilityChangeOnOption: (Boolean) -> Unit = {},
     onMenuNavigate: (String) -> Unit = {},
-    wordAction: (WordAction) -> Unit = {},
-    //onToggleFavourite: (Int, Boolean) -> Unit = { _, _ -> }
+    action: (Action) -> Unit = {},
+    navController: NavController? = null,
 ) {
 
     val listState = rememberLazyListState()
@@ -93,6 +108,18 @@ fun WordScreenContent(
     val menuColor by remember(isMenuOpen) { derivedStateOf { if (isMenuOpen) ColorIconBorderSelectedItem.copy(alpha = 0.5f) else ColorIconBorderUnselectedItem } }
     var menuIconBounds by remember { mutableStateOf<IntRect?>(null) }
 
+//    val isBarExpanded by viewModel?.isActionBarExpanded?.collectAsState()
+    val isBarExpanded = viewModel?.isActionBarExpanded?.collectAsState(initial = false)?.value ?: false
+
+    val actionItems = listOf(
+        ActionItem(Icons.Default.Edit, "Edit") {
+//            viewModel.editSelected()
+        },
+        ActionItem(Icons.Default.Delete, "Delete") {
+//            viewModel.deleteSelected()
+        },
+        ActionItem(Icons.Default.Info, "Details", route = "details")
+    )
 
     // 🔹 Filter + Sort words
     val filteredWords = remember(searchQuery, words) {
@@ -165,17 +192,17 @@ fun WordScreenContent(
                             colorFilter = ColorFilter.tint(menuColor)
                         )
 
-                        // 🔹 Popup menu
-                        CustomDropdownMenu(
-                            anchorBounds = menuIconBounds,
-                            isOpen = isMenuOpen,
-                            onDismissRequest = { isMenuOpen = true },
-                            items = myItemsList,
-                            onItemClick = { menuItem ->
-                                isMenuOpen = false
-                                onMenuNavigate(menuItem.route)
-                            }
-                        )
+//                        // 🔹 Popup menu
+//                        HVDropdownMenu(
+//                            anchorBounds = menuIconBounds,
+//                            isOpen = isMenuOpen,
+//                            onDismissRequest = { isMenuOpen = true },
+//                            items = menuItems,
+//                            onItemClick = { menuItem ->
+//                                isMenuOpen = false
+//                                onMenuNavigate(menuItem.route)
+//                            }
+//                        )
 
                     }
                 }
@@ -186,64 +213,111 @@ fun WordScreenContent(
 
         AnimatedVisibility(
             visible = isSearchVisible,
-            enter = enter_03,
-            exit = exitBouncy
+            enter = animationPairBouncyScale.first,
+            exit = animationPairBouncyScale.second
         )
          {
             OutlinedTextField(
-                     value = searchQuery,
-                     onValueChange = { searchQuery = it },
-                     label = {
-                         Text(
-                             "Search",
-                             color = searchViewColor
-                         )
-                     },
-                     modifier = Modifier
-                         .fillMaxWidth()
-                         .padding(vertical = 8.dp),
-                     singleLine = true,
-                     trailingIcon = {
-                         if (searchQuery.isNotEmpty()) {
-                             IconButton(onClick = { searchQuery = "" }) {
-                                 Icon(
-                                     imageVector = Icons.Default.Clear,
-                                     contentDescription = "Clear text"
-                                 )
-                             }
-                         }
-                     },
-                     shape = RoundedCornerShape(13.dp),
-                     colors = OutlinedTextFieldDefaults.colors(
-                         focusedBorderColor = searchViewColor,
-                         unfocusedBorderColor = searchViewColor,
-                         cursorColor = searchViewColor,
+                value = searchQuery,
+                 onValueChange = { searchQuery = it },
+                 label = {
+                     Text(
+                         "Search",
+                         color = searchViewColor
                      )
+                 },
+                 modifier = Modifier
+                     .fillMaxWidth()
+                     .padding(vertical = 8.dp),
+                 singleLine = true,
+                 trailingIcon = {
+                     if (searchQuery.isNotEmpty()) {
+                         IconButton(onClick = { searchQuery = "" }) {
+                             Icon(
+                                 imageVector = Icons.Default.Clear,
+                                 contentDescription = "Clear text"
+                             )
+                         }
+                     }
+                 },
+                 shape = RoundedCornerShape(13.dp),
+                 colors = OutlinedTextFieldDefaults.colors(
+                     focusedBorderColor = searchViewColor,
+                     unfocusedBorderColor = searchViewColor,
+                     cursorColor = searchViewColor,
                  )
+            )
         }
 
-        //val expandedState = remember { mutableStateMapOf<Int, Boolean>() }
+        var showBottomBar by remember { mutableStateOf(false) }
 
         LazyColumn(state = listState) {
             item {
                 Spacer(Modifier.height(16.dp)) // match your bottom bar height
             }
-
             items(filteredWords, key = { it.id }) { word ->
-                val expandedIds by viewModel.uiExpandCollapseState
-                val isExpanded = expandedIds.contains(word.id)
-
+                val isExpanded = viewModel?.uiExpandCollapseState?.value?.contains(word.id) == true
                 WordItemRow(
                     word = word,
                     isExpanded = isExpanded,
-                    onAction =  wordAction
+                    onAction =  { action ->
+                        when (action) {
+                            is UiActions.LongPress -> {
+                                val word = action.payload as? Word
+                                if (word != null) {
+                                    Log.e("TAG009", "WordScreenContent: ", )
+                                    showBottomBar = true
+                                }
+                            }
+                            is UiActions.Click -> {
+                                val word = action.payload as? Word
+                                if (word != null) {
+                                    Log.e("TAG009", "WordScreenContent: ", )
+                                    showBottomBar = true
+                                }
+                            }
+                        }
+                        action(action)
+
+                        showBottomBar = false
+                    }
                 )
             }
             item {
                 Spacer(Modifier.height(16.dp)) // match your bottom bar height
             }
         }
+
+        // Floating / expanding bottom bar
+        if (showBottomBar){
+            BottomActionBar(
+    //            isShown = showBottomBar,
+                isExpanded = !isBarExpanded,
+                onToggle = { viewModel?.toggleActionBar() },
+                actions = actionItems,
+                onActionClick = { action ->
+                    action.onAction?.invoke()
+                    action.route?.let { navController?.navigate(it) }
+                },
+                modifier = Modifier
+                //.align(Alignment.BottomCenter as Alignment.Horizontal)
+            )
+        }
     }
+
+    // 🔹 Popup menu
+    HVDropdownMenu(
+        anchorBounds = menuIconBounds,
+        isOpen = isMenuOpen,
+        onDismissRequest = { isMenuOpen = true },
+        items = menuItems,
+        onItemClick = { menuItem ->
+            isMenuOpen = false
+            onMenuNavigate(menuItem.route)
+        }
+    )
+
+    FloatingOptionMenu(items = menuItems){}
 }
 
 @Preview(showBackground = true)

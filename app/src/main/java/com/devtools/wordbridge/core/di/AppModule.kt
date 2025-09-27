@@ -1,4 +1,4 @@
-package com.devtools.wordbridge.app.di
+package com.devtools.wordbridge.core.di
 
 // di/AppModule.kt
 import android.content.Context
@@ -10,7 +10,9 @@ import com.devtools.wordbridge.data.local.WordDatabase
 import com.devtools.wordbridge.domain.repository.WordRepository
 import com.devtools.wordbridge.domain.usecase.AddWordUseCase
 import com.devtools.wordbridge.domain.usecase.DeleteWordUseCase
+import com.devtools.wordbridge.domain.usecase.GetAllFavoriteWordsUseCase
 import com.devtools.wordbridge.domain.usecase.GetAllWordsUseCase
+import com.devtools.wordbridge.domain.usecase.GetSingleWordUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,4 +47,10 @@ object AppModule {
 
     @Provides
     fun provideGetAllWordsUseCase(repository: WordRepository) = GetAllWordsUseCase(repository)
+
+    @Provides
+    fun provideGetAllFavoriteWordsUseCase(repository: WordRepository) = GetAllFavoriteWordsUseCase(repository)
+
+    @Provides
+    fun provideGetSingleWordUseCase(repository: WordRepository) = GetSingleWordUseCase(repository)
 }

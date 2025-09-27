@@ -14,4 +14,10 @@ interface WordDao {
 
     @Query("SELECT * FROM words")
     fun getAllWords(): Flow<List<WordEntity>>
+
+    @Query("SELECT * FROM words WHERE isFavorite = 1")
+    fun getAllFavoriteWords(): Flow<List<WordEntity>>
+
+    @Query("SELECT * FROM words WHERE id = :id")
+    fun getWord(id: Int): Flow<WordEntity>
 }

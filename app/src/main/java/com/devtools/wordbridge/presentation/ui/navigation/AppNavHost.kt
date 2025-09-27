@@ -15,16 +15,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.devtools.wordbridge.presentation.screen.favorite.FavoriteScreen
 import com.devtools.wordbridge.presentation.screen.settings.SettingsScreen
 import com.devtools.wordbridge.presentation.screen.widget_settings.WidgetSettingsScreen
 import com.devtools.wordbridge.presentation.screen.word_add.WordAddScreen
 import com.devtools.wordbridge.presentation.screen.word_list.WordScreen
+import com.devtools.wordbridge.presentation.screen.word_list.WordViewModel
+import com.devtools.wordbridge.presentation.screen.word_update.WordUpdateScreen
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -34,6 +41,7 @@ fun AppNavHost() {
     val navController = rememberNavController()
     var onScrollVisibleOption by remember { mutableStateOf(true) }
     val currentRoute by navController.currentBackStackEntryAsState()
+    val wordViewModel: WordViewModel = hiltViewModel()
 
     Scaffold(contentWindowInsets = WindowInsets(0)) { innerPadding : PaddingValues->
         Box(
@@ -56,13 +64,41 @@ fun AppNavHost() {
                                 launchSingleTop = true
                                 restoreState = true
                             }
-                        }
+                        },
+                        navController = navController,
+                        viewModel = wordViewModel
                     )
                 }
-                composable(NavItem.WordAdd.route) { WordAddScreen (onWordSaved = {}, onBackClicked = {navController.popBackStack() }) }
+                composable(NavItem.WordAdd.route) {
+                    WordAddScreen(
+                        onWordSaved = {},
+                        onBackClicked = {navController.popBackStack() }
+                    )
+                }
+                composable(
+                    NavItem.WordUpdate.route,
+                    arguments = listOf(
+                    navArgument("wordId") {
+                        type = NavType.IntType
+                        defaultValue = 0
+                    }
+                )) { backStackEntry ->
+                    val wordId = backStackEntry.arguments?.getInt("wordId") ?: 0
+                    WordUpdateScreen(
+                        wordId = wordId,
+                        onWordUpdated = { navController.popBackStack() },
+                        onBackClicked = { navController.popBackStack() },
+                    )
+                }
                 composable(NavItem.WidgetSetting.route) { WidgetSettingsScreen() { navController.popBackStack() } }
                 composable(NavItem.Settings.route) { SettingsScreen() { navController.popBackStack() } }
-                composable(NavItem.Favorite.route) { FavoriteScreen() { navController.popBackStack() } }
+                composable(NavItem.Favorite.route) {
+                    FavoriteScreen(
+                        onBackClicked = { navController.popBackStack() },
+                        navController = navController,
+                        viewModel = wordViewModel
+                    )
+                }
             }
         }
     }

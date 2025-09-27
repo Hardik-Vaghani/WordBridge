@@ -1,11 +1,14 @@
 package com.devtools.wordbridge.presentation.ui.custom_ui
 
+import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import com.devtools.wordbridge.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 
@@ -38,10 +44,12 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
-import com.devtools.wordbridge.presentation.ui.theme.ColorDividerSeparator_1
+import com.devtools.wordbridge.presentation.ui.navigation.NavItem
+import com.devtools.wordbridge.presentation.ui.navigation.toMenuItem
 import com.devtools.wordbridge.presentation.ui.theme.ColorDividerSeparator_2
-import com.devtools.wordbridge.presentation.ui.theme.enter_03
-import com.devtools.wordbridge.presentation.ui.theme.exit_03
+import com.devtools.wordbridge.presentation.ui.theme.animationPairBouncySlideMenu
+import com.devtools.wordbridge.presentation.ui.theme.enterScaleMediumBounce
+import com.devtools.wordbridge.presentation.ui.theme.exitScaleMediumBounce
 import kotlinx.coroutines.delay
 
 data class CustomMenuItem(
@@ -50,14 +58,14 @@ data class CustomMenuItem(
     //val icon: ImageVector? = null,
     @DrawableRes val icon: Int? = null,
     val iconTint: Color = Color.White,
-    val labelColor: Color = Color.White,
     val backgroundColor: Color = Color.Transparent,
     val selectedColor: Color = Color.Blue.copy(alpha = 0.3f),
     val onClick: () -> Unit = {}
 )
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
-fun CustomDropdownMenu(
+fun HVDropdownMenu(
     modifier: Modifier = Modifier,
     anchorBounds: IntRect?,
     isOpen: Boolean,
@@ -73,6 +81,10 @@ fun CustomDropdownMenu(
 
     var showMenu by remember { mutableStateOf(isOpen) }
 
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val surfaceWidth = screenWidth * 0.75f // 3/4 of screen width
+
     // Update local state when isOpen changes
     LaunchedEffect(isOpen) {
         if (isOpen) {
@@ -85,25 +97,26 @@ fun CustomDropdownMenu(
     }
 
     if (!showMenu) return
+    // Full-screen box so menu floats over content
 
+    // Calculate vertical offset from anchor (optional)
     val density = LocalDensity.current
-    val offsetX = anchorBounds.left
-    val offsetY = anchorBounds.bottom + with(density) { 8.dp.toPx() }.toInt()
+    val topPadding = with(density) { (anchorBounds.bottom + 16.dp.toPx()).toDp() }
 
-
-    Popup(
-        onDismissRequest = onDismissRequest,
-        offset = IntOffset(offsetX, offsetY),
-        alignment = Alignment.TopCenter
+    Box(
+        modifier = modifier
+            .wrapContentWidth()
+            .padding(top = topPadding), // distance from bottom
+        contentAlignment = Alignment.TopCenter
     ) {
         AnimatedVisibility(
             visible = isOpen,
-            enter = enter_03,
-            exit = exit_03
+            enter = animationPairBouncySlideMenu.first,
+            exit = animationPairBouncySlideMenu.second
         ) {
             Surface(
                 modifier = modifier
-                    .padding(horizontal = 80.dp, vertical = 8.dp)
+                    .width(surfaceWidth)
                     .widthIn(min = 180.dp)
                     .shadow(elevation = menuElevation, shape = RoundedCornerShape(menuCornerRadius))
                     .clip(RoundedCornerShape(menuCornerRadius))
@@ -125,6 +138,47 @@ fun CustomDropdownMenu(
             }
         }
     }
+    /*val density = LocalDensity.current
+    val offsetX = anchorBounds.left
+    val offsetY = anchorBounds.bottom // anchorBounds.bottom + with(density) { 8.dp.toPx() }.toInt()
+
+
+    Popup(
+        onDismissRequest = onDismissRequest,
+        offset = IntOffset(offsetX, offsetY),
+        alignment = Alignment.TopCenter
+    ) {
+        AnimatedVisibility(
+            visible = isOpen,
+            enter = animationPairBouncySlideMenu.first,
+            exit = animationPairBouncySlideMenu.second
+        ) {
+            Surface(
+                modifier = modifier
+                    //.padding(horizontal = 80.dp, vertical = 8.dp)
+                    .padding(end = (screenWidth - surfaceWidth)/2)
+                    .width(surfaceWidth)
+                    .widthIn(min = 180.dp)
+                    .shadow(elevation = menuElevation, shape = RoundedCornerShape(menuCornerRadius))
+                    .clip(RoundedCornerShape(menuCornerRadius))
+                    .background(menuBackgroundColor),
+                shape = RoundedCornerShape(menuCornerRadius),
+                color = MaterialTheme.colorScheme.surface,
+            ) {
+                Column(modifier = Modifier.background(color = menuBackgroundColor)) {
+                    items.forEachIndexed { index, item ->
+                        val delay = index * 60
+                        AnimatedItem(
+                            delayMillis = delay,
+                            item = item,
+                            showDivider = index != items.lastIndex,
+                            onClick = { onItemClick(item) }
+                        )
+                    }
+                }
+            }
+        }
+    }*/
 }
 
 @Composable
@@ -132,7 +186,6 @@ private fun AnimatedItem(
     delayMillis: Int,
     item: CustomMenuItem,
     showDivider: Boolean,
-    animationDuration: Int = 300,
     onClick: () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
@@ -143,8 +196,8 @@ private fun AnimatedItem(
 
     AnimatedVisibility(
         visible = visible,
-        enter = enter_03,
-        exit = exit_03
+        enter = enterScaleMediumBounce,
+        exit = exitScaleMediumBounce
 
     ) {
         Column {
@@ -185,15 +238,43 @@ private fun AnimatedItem(
     }
 }
 
-val myItemsList = listOf(
-//    CustomMenuItem(route = "words", label = "Words", labelColor = Color.Red, icon = Icons.Default.Settings, iconTint = Color(0xFF81C784), selectedColor = Color(0xFF81C784)),
-    CustomMenuItem(route = "word_add", label = "Add", labelColor = Color.Green, icon = R.drawable.ic_selected_add, iconTint = Color(0xFFE57373), selectedColor = Color(0xFFE57373)),
-    CustomMenuItem(route = "favorite", label = "Favorite", labelColor = Color.Blue, icon = R.drawable.ic_selected_favorite, iconTint = Color(0xFF4FC3F7), selectedColor = Color(0xFF4FC3F7)),
-    CustomMenuItem(route = "settings", label = "Settings", labelColor = Color.Yellow, icon = R.drawable.ic_selected_setting, iconTint = Color(0xFF4DB6AC), selectedColor = Color(0xFF4DB6AC)),
-    CustomMenuItem(route = "widget_setting", label = "Widget", labelColor = Color.Magenta, icon = R.drawable.ic_selected_setting, iconTint = Color(0xFFBA68C8), selectedColor = Color(0xFFBA68C8)),
-//    CustomMenuItem(route = "Item 6", label = "Item 6", labelColor = Color.Cyan, icon = Icons.Default.Settings, iconTint = Color(0xFFFF8A65), selectedColor = Color(0xFFFF8A65)),
+/** Option manu */
+val optionMenu = listOf(
+    CustomMenuItem(route = "", label = "Archive", icon = R.drawable.ic_selected_add, iconTint = Color(0xFF81C784), selectedColor = Color(0xFF81C784)),
+    CustomMenuItem(route = "", label = "Edit", icon = R.drawable.ic_selected_add, iconTint = Color(0xFFE57373), selectedColor = Color(0xFFE57373)),
+    CustomMenuItem(route = "", label = "Delete", icon = R.drawable.ic_selected_favorite, iconTint = Color(0xFF4FC3F7), selectedColor = Color(0xFF4FC3F7)),
+    CustomMenuItem(route = "", label = "Favorite", icon = R.drawable.ic_selected_setting, iconTint = Color(0xFF4DB6AC), selectedColor = Color(0xFF4DB6AC)),
+    CustomMenuItem(route = "", label = "Export", icon = R.drawable.ic_selected_setting, iconTint = Color(0xFFBA68C8), selectedColor = Color(0xFFBA68C8)),
+    CustomMenuItem(route = "", label = "Item_6", icon = R.drawable.ic_selected_add, iconTint = Color(0xFFFF8A65), selectedColor = Color(0xFFFF8A65)),
 
 )
+
+/** Top manu */
+val navItems = listOf(
+    NavItem.WordAdd,
+    NavItem.Favorite,
+    NavItem.Settings,
+    NavItem.WidgetSetting
+)
+
+val menuItems = navItems.mapIndexed { index, navItem ->
+    navItem.toMenuItem(
+        iconTint = when (index) {
+            0 -> Color(0xFFE57373)//Color(0xFF81C784),Color(0xFFFF8A65)
+            1 -> Color(0xFF4FC3F7)
+            2 -> Color(0xFF4DB6AC)
+            else -> Color(0xFFBA68C8)
+        },
+        selectedColor = when (index) {
+            0 -> Color(0xFFE57373)
+            1 -> Color(0xFF4FC3F7)
+            2 -> Color(0xFF4DB6AC)
+            else -> Color(0xFFBA68C8)
+        },
+        onClick = { /* handle click here */ }
+    )
+}
+
 fun Rect.toIntRect(): IntRect = IntRect(
     left = this.left.toInt(),
     top = this.top.toInt(),

@@ -27,10 +27,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.devtools.wordbridge.domain.model.Word
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
@@ -44,7 +40,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -52,11 +47,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import com.devtools.wordbridge.R
-import com.devtools.wordbridge.domain.action.WordAction
+import com.devtools.wordbridge.core.action.Action
+import com.devtools.wordbridge.domain.action.DomainActions
+import com.devtools.wordbridge.presentation.action.UiActions
 import com.devtools.wordbridge.presentation.ui.theme.ColorDividerSeparator_1
 import com.devtools.wordbridge.presentation.ui.theme.ColorItemBackground
 import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorder
 import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorderDeActive
+import com.devtools.wordbridge.presentation.ui.theme.animationPairBouncyScaleDown
+import com.devtools.wordbridge.presentation.ui.theme.presetSmoothExpand
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -101,7 +101,7 @@ private fun WordCard(
     onSingleClick: () -> Unit,
     onDoubleClick: () -> Unit,
     onLongPress: () -> Unit,
-    onToggleFavourite: (Int, Boolean) -> Unit,
+    onClickFavourite: (Int, Boolean) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -137,26 +137,43 @@ private fun WordCard(
                         horizontalArrangement = horizontalArrangement
                     ) {
                         Text(
-                            text = "Primary: ${word.primaryWord}",
+                            text = word.primaryWord,
                             style = MaterialTheme.typography.titleMedium,
                         )
 
                         Text(
-                            text = "Secondary: ${word.secondaryWord}",
+                            text = word.secondaryWord,
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }
 
-                    // Only visible when expanded
-                    AnimatedVisibility(
-                        visible = isExpanded,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
-                        Column(Modifier
-                            .fillMaxWidth()
-                        ) {
+                    var outerVisible by remember { mutableStateOf(false) }
+                    var innerVisible by remember { mutableStateOf(false) }
 
+                    // whenever isExpanded changes:
+                    LaunchedEffect(isExpanded) {
+                        if (isExpanded) {
+                            // show outer immediately
+                            outerVisible = true
+                            // after a short delay show inner
+                            delay(50)
+                            innerVisible = true
+                        } else {
+                            // start inner exit first
+                            innerVisible = false
+                            // wait for inner exit to finish (match your exit animation duration)
+                            delay(100) // adjust to your animationPairBouncyScaleDown exit duration
+                            // now hide the outer
+                            outerVisible = false
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = outerVisible,
+                        enter = presetSmoothExpand.first,
+                        exit = presetSmoothExpand.second
+                    ) {
+                        Column(Modifier.fillMaxWidth()) {
                             DottedHorizontalDivider(
                                 modifier = Modifier.height(18.dp).padding(horizontal = 0.dp),
                                 color = ColorDividerSeparator_1.copy(alpha = 0.5f),
@@ -165,20 +182,19 @@ private fun WordCard(
                                 gapLength = 6f
                             )
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = horizontalArrangement
-                            ) {
-                                Text(
-                                    "Meaning: ${word.wordMeaning}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                                Text(
-                                    "Pronunciation: ${word.secondaryWordPronunciation}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                            }
+                            AnimatedTextField(
+                                text = "Meaning: ${word.wordMeaning}",
+                                visible = innerVisible,
+                                enter = animationPairBouncyScaleDown.first,
+                                exit = animationPairBouncyScaleDown.second
+                            )
+
+                            AnimatedTextField(
+                                text = "Pronunciation: ${word.secondaryWordPronunciation}",
+                                visible = innerVisible,
+                                enter = animationPairBouncyScaleDown.first,
+                                exit = animationPairBouncyScaleDown.second
+                            )
                         }
                     }
                 }
@@ -187,15 +203,15 @@ private fun WordCard(
 
         Box(
             modifier = Modifier
-                .align(Alignment.CenterEnd) // ⬅️ key line
-                .offset(x = (16).dp, y = (0).dp)
+                .align(Alignment.TopEnd) // ⬅️ key line
+                .offset(x = (-8).dp, y = (-4).dp)
                 .background(Color.Transparent, shape = CircleShape)
-                .size(32.dp)
+                .size(24.dp)
                 .clip(CircleShape)
                 .clickable (
                     interactionSource = remember { MutableInteractionSource() },
                     indication = LocalIndication.current,
-                    onClick = {onToggleFavourite(word.id, !word.isFavorite)},
+                    onClick = {onClickFavourite(word.id, !word.isFavorite)},
             )
         ){
             Image(
@@ -249,7 +265,7 @@ private fun WordActionsDialog(
 fun WordItemRow(
     word: Word,
     isExpanded: Boolean,
-    onAction: (WordAction) -> Unit,
+    onAction: (Action) -> Unit,
     enableSwipeStartToEnd: Boolean = true,
     enableSwipeEndToStart: Boolean = true
 ) {
@@ -265,13 +281,17 @@ fun WordItemRow(
             SwipeToDismissBoxValue.EndToStart -> if (enableSwipeEndToStart) {
                 val newValue = !favState
                 favState = newValue
-                onAction(WordAction.ToggleFavourite(word.id, newValue))
+                //onAction(WordAction.ToggleFavourite(word.id, newValue))
+                onAction(DomainActions.ToggleFavouriteWord(word.id, newValue))
+                onAction(UiActions.SwipeLeft(payload = word))
                 dismissState.reset()
             }
             SwipeToDismissBoxValue.StartToEnd -> if (enableSwipeStartToEnd) {
                 val newValue = !favState
                 favState = newValue
-                onAction(WordAction.ToggleFavourite(word.id, newValue))
+                //onAction(WordAction.ToggleFavourite(word.id, newValue))
+                onAction(DomainActions.ToggleFavouriteWord(word.id, newValue))
+                onAction(UiActions.SwipeRight(payload = word))
                 dismissState.reset()
             }
             else -> Unit
@@ -284,37 +304,58 @@ fun WordItemRow(
         enableDismissFromEndToStart = enableSwipeEndToStart,
         backgroundContent = { SwipeBackground(dismissState.dismissDirection) },
         content = {
-            WordCard(
-                word = word.copy(isFavorite = favState), // show local state
-                isExpanded = isExpanded,
-                onSingleClick = {
-                    // Toggle expand/collapse via parent
-                    onAction(WordAction.ExpandCollapse(word.id))
-                },
-                onDoubleClick = {
-                    val newValue = !favState
-                    favState = newValue
-                    onAction(WordAction.ToggleFavourite(word.id, newValue))
-                },
-                onLongPress = { showDialog = true },
-                onToggleFavourite = { id, fav ->
-                    favState = fav
-                    onAction(WordAction.ToggleFavourite(id, fav))
-                }
-            )
+//            val isDismissed = dismissState.currentValue != SwipeToDismissBoxValue.Settled
+//
+//            AnimatedVisibility(
+//                visible = !isDismissed, // false once dismissed
+//                enter = enterScaleLowBounce,
+//                exit = exitSlideUpBouncy
+//            ) {
+                WordCard(
+                    word = word.copy(isFavorite = favState), // show local state
+                    isExpanded = isExpanded,
+                    onSingleClick = {
+                        // Toggle expand/collapse via parent
+                        //onAction(WordAction.ToggleExpandCollapse(word.id))
+                        onAction(UiActions.Click(payload = word))
+                    },
+                    onDoubleClick = {
+                        val newValue = !favState
+                        favState = newValue
+                        //onAction(WordAction.ToggleFavourite(word.id, newValue))
+                        onAction(UiActions.DoubleClick(payload = word))
+                    },
+                    onLongPress = {
+                        showDialog = true
+                        onAction(UiActions.LongPress(payload = word))
+                    },
+                    onClickFavourite = { id, fav ->
+                        favState = fav
+                        //onAction(WordAction.ToggleFavourite(id, fav))
+                        onAction(DomainActions.ToggleFavouriteWord(word.id, fav))
+                    }
+
+                )
+//            }
         }
     )
 
-    WordActionsDialog(
+    /*WordActionsDialog(
         show = showDialog,
         word = word.copy(isFavorite = favState),
-        onEdit = { onAction(WordAction.Edit(word)) },
-        onDelete = { onAction(WordAction.Delete(word)) },
+        onEdit = {
+            //onAction(WordAction.Edit(word))
+            onAction(UiAction.NavigateToScreen(data = word))
+         },
+        onDelete = {
+            //onAction(WordAction.Delete(word))
+            onAction(DbAction.DeleteWord(word))
+        },
         onToggleFav = {
             val newValue = !favState
             favState = newValue
-            onAction(WordAction.ToggleFavourite(word.id, newValue))
+            //onAction(WordAction.ToggleFavourite(word.id, newValue))
         },
         onDismiss = { showDialog = false }
-    )
+    )*/
 }
