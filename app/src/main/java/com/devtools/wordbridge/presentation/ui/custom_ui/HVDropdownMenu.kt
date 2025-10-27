@@ -7,7 +7,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,28 +38,16 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
+import com.devtools.wordbridge.presentation.ui.HVMenuItem
 import com.devtools.wordbridge.presentation.ui.navigation.NavItem
 import com.devtools.wordbridge.presentation.ui.navigation.toMenuItem
-import com.devtools.wordbridge.presentation.ui.theme.ColorDividerSeparator_2
+import com.devtools.wordbridge.presentation.ui.theme.colorDividerSeparator_2
 import com.devtools.wordbridge.presentation.ui.theme.animationPairBouncySlideMenu
 import com.devtools.wordbridge.presentation.ui.theme.enterScaleMediumBounce
 import com.devtools.wordbridge.presentation.ui.theme.exitScaleMediumBounce
 import kotlinx.coroutines.delay
-
-data class CustomMenuItem(
-    val route: String,
-    val label: String,
-    //val icon: ImageVector? = null,
-    @DrawableRes val icon: Int? = null,
-    val iconTint: Color = Color.White,
-    val backgroundColor: Color = Color.Transparent,
-    val selectedColor: Color = Color.Blue.copy(alpha = 0.3f),
-    val onClick: () -> Unit = {}
-)
 
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
@@ -69,12 +55,12 @@ fun HVDropdownMenu(
     modifier: Modifier = Modifier,
     anchorBounds: IntRect?,
     isOpen: Boolean,
-    onDismissRequest: () -> Unit,
-    items: List<CustomMenuItem>,
+    items: List<HVMenuItem.DropDown>,
     menuBackgroundColor: Color = Color(0xFF2C3E50),
     menuCornerRadius: Dp = 12.dp,
     menuElevation: Dp = 8.dp,
-    onItemClick: (CustomMenuItem) -> Unit
+    onItemClick: (HVMenuItem.DropDown) -> Unit,
+    onDismissRequest: () -> Unit,
 ) {
 //    if (!isOpen || anchorBounds == null) return
     if (anchorBounds == null) return
@@ -184,7 +170,7 @@ fun HVDropdownMenu(
 @Composable
 private fun AnimatedItem(
     delayMillis: Int,
-    item: CustomMenuItem,
+    item: HVMenuItem.DropDown,
     showDivider: Boolean,
     onClick: () -> Unit
 ) {
@@ -228,7 +214,7 @@ private fun AnimatedItem(
             if (showDivider) {
                 DottedHorizontalDivider(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    color = ColorDividerSeparator_2.copy(alpha = 0.5f),
+                    color = colorDividerSeparator_2().copy(alpha = 0.5f),
                     thickness = 0.7.dp,
                     dashLength = 6f,
                     gapLength = 6f
@@ -237,47 +223,3 @@ private fun AnimatedItem(
         }
     }
 }
-
-/** Option manu */
-val optionMenu = listOf(
-    CustomMenuItem(route = "", label = "Archive", icon = R.drawable.ic_selected_add, iconTint = Color(0xFF81C784), selectedColor = Color(0xFF81C784)),
-    CustomMenuItem(route = "", label = "Edit", icon = R.drawable.ic_selected_add, iconTint = Color(0xFFE57373), selectedColor = Color(0xFFE57373)),
-    CustomMenuItem(route = "", label = "Delete", icon = R.drawable.ic_selected_favorite, iconTint = Color(0xFF4FC3F7), selectedColor = Color(0xFF4FC3F7)),
-    CustomMenuItem(route = "", label = "Favorite", icon = R.drawable.ic_selected_setting, iconTint = Color(0xFF4DB6AC), selectedColor = Color(0xFF4DB6AC)),
-    CustomMenuItem(route = "", label = "Export", icon = R.drawable.ic_selected_setting, iconTint = Color(0xFFBA68C8), selectedColor = Color(0xFFBA68C8)),
-    CustomMenuItem(route = "", label = "Item_6", icon = R.drawable.ic_selected_add, iconTint = Color(0xFFFF8A65), selectedColor = Color(0xFFFF8A65)),
-
-)
-
-/** Top manu */
-val navItems = listOf(
-    NavItem.WordAdd,
-    NavItem.Favorite,
-    NavItem.Settings,
-    NavItem.WidgetSetting
-)
-
-val menuItems = navItems.mapIndexed { index, navItem ->
-    navItem.toMenuItem(
-        iconTint = when (index) {
-            0 -> Color(0xFFE57373)//Color(0xFF81C784),Color(0xFFFF8A65)
-            1 -> Color(0xFF4FC3F7)
-            2 -> Color(0xFF4DB6AC)
-            else -> Color(0xFFBA68C8)
-        },
-        selectedColor = when (index) {
-            0 -> Color(0xFFE57373)
-            1 -> Color(0xFF4FC3F7)
-            2 -> Color(0xFF4DB6AC)
-            else -> Color(0xFFBA68C8)
-        },
-        onClick = { /* handle click here */ }
-    )
-}
-
-fun Rect.toIntRect(): IntRect = IntRect(
-    left = this.left.toInt(),
-    top = this.top.toInt(),
-    right = this.right.toInt(),
-    bottom = this.bottom.toInt()
-)

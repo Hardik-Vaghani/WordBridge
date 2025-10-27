@@ -49,11 +49,11 @@ import com.devtools.wordbridge.core.action.Action
 import com.devtools.wordbridge.domain.model.Word
 import com.devtools.wordbridge.presentation.screen.word_list.WordViewModel
 import com.devtools.wordbridge.presentation.ui.custom_ui.WordItemRow
-import com.devtools.wordbridge.presentation.ui.theme.ColorIconBorderSelectedItem
-import com.devtools.wordbridge.presentation.ui.theme.ColorIconBorderUnselectedItem
-import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorder
-import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorderActive
-import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorderDeActive
+import com.devtools.wordbridge.presentation.ui.theme.colorIconBorderActivate
+import com.devtools.wordbridge.presentation.ui.theme.colorIconBorderDeactivate
+import com.devtools.wordbridge.presentation.ui.theme.colorOutlinedTextBorder
+import com.devtools.wordbridge.presentation.ui.theme.colorOutlinedTextBorderActive
+import com.devtools.wordbridge.presentation.ui.theme.colorOutlinedTextBorderDeActive
 import com.devtools.wordbridge.presentation.ui.theme.animationPairBouncyScale
 
 @Composable
@@ -97,12 +97,15 @@ fun FavoriteScreenContent(
     onBackClicked: () -> Unit = {}
 ) {
     val listState = rememberLazyListState()
-
+    val activeColor = colorOutlinedTextBorderActive()
+    val deActiveColor = colorOutlinedTextBorderDeActive() // static color
     // 🔹 Search query state
     var searchQuery by remember { mutableStateOf("") }
-    val searchViewColor by remember(searchQuery) { derivedStateOf { if (searchQuery.isBlank()) ColorOutlinedTextBorderDeActive else ColorOutlinedTextBorderActive.copy(alpha = 0.5f) } }
+    val searchViewColor by remember(searchQuery) { derivedStateOf { if (searchQuery.isBlank()) deActiveColor else activeColor.copy(alpha = 0.5f) } }
     var isSearchVisible by remember { mutableStateOf(false) }
-    val searchColor by remember(isSearchVisible) { derivedStateOf { if (isSearchVisible) ColorIconBorderSelectedItem.copy(alpha = 0.5f) else ColorIconBorderUnselectedItem } }
+    val selectedItemColor = colorIconBorderActivate()
+    val unselectedItemColor = colorIconBorderDeactivate()
+    val searchColor by remember(isSearchVisible) { derivedStateOf { if (isSearchVisible) selectedItemColor.copy(alpha = 0.5f) else unselectedItemColor } }
 
     // 🔹 Filter + Sort words
     val filteredWords = remember(searchQuery, words) {
@@ -122,7 +125,7 @@ fun FavoriteScreenContent(
             .fillMaxWidth()
             .wrapContentHeight(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
 
-            Text("Favorite", color = ColorOutlinedTextBorder, style = MaterialTheme.typography.headlineMedium)
+            Text("Favorite", color = colorOutlinedTextBorder(), style = MaterialTheme.typography.headlineMedium)
 
             Row(modifier = Modifier
                 .fillMaxWidth()
@@ -162,9 +165,9 @@ fun FavoriteScreenContent(
                         modifier = Modifier
                             .size(width = 64.dp, height = 32.dp)
                             .background(color = Color.Transparent)
-                            .border(width = 1.dp, color = ColorIconBorderUnselectedItem, shape = RoundedCornerShape(8.dp))
+                            .border(width = 1.dp, color = colorIconBorderDeactivate(), shape = RoundedCornerShape(8.dp))
                             .padding(4.dp),
-                        colorFilter = ColorFilter.tint(ColorIconBorderUnselectedItem)
+                        colorFilter = ColorFilter.tint(colorIconBorderDeactivate())
                     )
                 }
 

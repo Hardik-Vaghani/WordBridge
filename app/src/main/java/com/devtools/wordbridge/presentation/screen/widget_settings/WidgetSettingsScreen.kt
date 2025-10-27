@@ -25,10 +25,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.devtools.wordbridge.R
-import com.devtools.wordbridge.presentation.ui.custom_ui.FloatingOptionMenu
-import com.devtools.wordbridge.presentation.ui.custom_ui.menuItems
-import com.devtools.wordbridge.presentation.ui.theme.ColorIconBorderUnselectedItem
-import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorder
+import com.devtools.wordbridge.presentation.ui.theme.colorIconBorderDeactivate
+import com.devtools.wordbridge.presentation.ui.theme.colorOutlinedTextBorder
 
 @Composable
 fun WidgetSettingsScreen(onBackClicked: () -> Unit) {
@@ -38,7 +36,7 @@ fun WidgetSettingsScreen(onBackClicked: () -> Unit) {
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)) {
         Row(modifier = Modifier.fillMaxWidth().wrapContentHeight(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
 
-            Text("Widget", color = ColorOutlinedTextBorder, style = MaterialTheme.typography.headlineMedium)
+            Text("Widget", color = colorOutlinedTextBorder(), style = MaterialTheme.typography.headlineMedium)
 
             Row(modifier = Modifier.fillMaxWidth().height(33.dp), horizontalArrangement = Arrangement.End) {
 
@@ -53,9 +51,9 @@ fun WidgetSettingsScreen(onBackClicked: () -> Unit) {
                         modifier = Modifier
                             .size(width = 64.dp, height = 32.dp)
                             .background(color = Color.Transparent)
-                            .border(width = 1.dp, color = ColorIconBorderUnselectedItem, shape = RoundedCornerShape(8.dp))
+                            .border(width = 1.dp, color = colorIconBorderDeactivate(), shape = RoundedCornerShape(8.dp))
                             .padding(4.dp),
-                        colorFilter = ColorFilter.tint(ColorIconBorderUnselectedItem)
+                        colorFilter = ColorFilter.tint(colorIconBorderDeactivate())
                     )
                 }
             }

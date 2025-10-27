@@ -1,6 +1,7 @@
 package com.devtools.wordbridge.presentation
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.devtools.wordbridge.core.action.Action
 import com.devtools.wordbridge.core.action.ActionHandler
 import com.devtools.wordbridge.core.action.DomainAction
@@ -11,7 +12,11 @@ import com.devtools.wordbridge.domain.model.Word
 import com.devtools.wordbridge.presentation.action.UiActions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 /**
@@ -21,12 +26,16 @@ import javax.inject.Inject
 @HiltViewModel
 open class BaseViewModel @Inject constructor() : ViewModel(), ActionHandler<Action> {
 
+    private val _words = MutableStateFlow<List<Word>>(emptyList())
+    protected val words: StateFlow<List<Word>> = _words.asStateFlow()
     private val _itemSelection = MutableStateFlow<List<Word>>(emptyList())
     val itemSelection = _itemSelection.asStateFlow()
 
     // derived property: true if anything selected
-    val isSelectionActive: Boolean
-        get() = _itemSelection.value.isNotEmpty()
+    val isSelectionActive: StateFlow<Boolean> =
+        itemSelection.map { it.isNotEmpty() }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
 
     private fun select(word: Word) {
         val current = _itemSelection.value.toMutableList()
@@ -44,6 +53,14 @@ open class BaseViewModel @Inject constructor() : ViewModel(), ActionHandler<Acti
         _itemSelection.value = emptyList()
     }
 
+    fun selectAllWords() {
+        _itemSelection.value = _words.value.toList() // copies all words into selection
+    }
+
+    protected fun setWordsList(list: List<Word>) {
+        _words.value = list
+        _itemSelection.value = emptyList()
+    }
 
     // ✅ These can be overridden by subclasses
     open fun expandCollapse(wordId: Int) {}
@@ -68,7 +85,7 @@ open class BaseViewModel @Inject constructor() : ViewModel(), ActionHandler<Acti
             is UiActions.Click -> {
                 when (val data = action.payload) {
                     is Word -> {
-                        if (isSelectionActive) {
+                        if (isSelectionActive.value) {
                             // selection mode active → toggle selection
                             select(data)
                         } else {

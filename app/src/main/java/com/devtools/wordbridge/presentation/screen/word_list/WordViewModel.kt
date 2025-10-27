@@ -26,16 +26,22 @@ class WordViewModel @Inject constructor(
     getAllFavoriteWordsUseCase: GetAllFavoriteWordsUseCase,
 ) : BaseViewModel() {
 
-    val words = getAllWordsUseCase().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+//    val wordsFlow = getAllWordsUseCase().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    val wordsFlow = super.words
+
+    init {
+        viewModelScope.launch {
+            getAllWordsUseCase().collect { list ->
+                setWordsList(list)
+            }
+        }
+    }
     val favoriteWords = getAllFavoriteWordsUseCase().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
     private val _navigationEvent = MutableStateFlow<String?>(null)
     val navigationEvent = _navigationEvent.asStateFlow()
-
-    private val _isActionBarExpanded = MutableStateFlow(false)
-    val isActionBarExpanded = _isActionBarExpanded.asStateFlow()
-    fun toggleActionBar() {
-        _isActionBarExpanded.value = !_isActionBarExpanded.value
-    }
+//    private val _isActionBarExpanded = MutableStateFlow(false)
+//    val isActionBarExpanded = _isActionBarExpanded.asStateFlow()
+//    fun toggleActionBar() { _isActionBarExpanded.value = !_isActionBarExpanded.value }
 
     override fun navigateToUpdateScreen(wordId: Int) {
         // Create route with wordId as parameter
@@ -57,7 +63,7 @@ class WordViewModel @Inject constructor(
 
     override fun onToggleFavourite(wordId: Int, isFav: Boolean) {
         viewModelScope.launch {
-            val updatedWord = words.value.find { it.id == wordId }?.copy(isFavorite = isFav)
+            val updatedWord = wordsFlow.value.find { it.id == wordId }?.copy(isFavorite = isFav)
             if (updatedWord != null) {
                 upsertWord(updatedWord)
             }

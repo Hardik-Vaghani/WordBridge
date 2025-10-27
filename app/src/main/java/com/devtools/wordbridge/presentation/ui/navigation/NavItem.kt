@@ -3,7 +3,7 @@ package com.devtools.wordbridge.presentation.ui.navigation
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
 import com.devtools.wordbridge.R
-import com.devtools.wordbridge.presentation.ui.custom_ui.CustomMenuItem
+import com.devtools.wordbridge.presentation.ui.HVMenuItem
 
 
 sealed class NavItem(
@@ -44,7 +44,7 @@ fun NavItem.toMenuItem(
     iconTint: Color,
     selectedColor: Color,
     onClick: () -> Unit
-) = CustomMenuItem(
+) = HVMenuItem.DropDown(
     route = route,
     label = label,
     icon = selectedIcon, // or unselectedIcon depending on state

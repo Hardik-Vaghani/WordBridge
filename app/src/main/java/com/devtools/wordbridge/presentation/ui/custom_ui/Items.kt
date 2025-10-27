@@ -27,6 +27,16 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.devtools.wordbridge.domain.model.Word
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
@@ -45,17 +55,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import com.devtools.wordbridge.R
 import com.devtools.wordbridge.core.action.Action
 import com.devtools.wordbridge.domain.action.DomainActions
 import com.devtools.wordbridge.presentation.action.UiActions
-import com.devtools.wordbridge.presentation.ui.theme.ColorDividerSeparator_1
-import com.devtools.wordbridge.presentation.ui.theme.ColorItemBackground
-import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorder
-import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorderDeActive
+import com.devtools.wordbridge.presentation.ui.theme.colorDividerSeparator_1
+import com.devtools.wordbridge.presentation.ui.theme.colorItemBackground
+import com.devtools.wordbridge.presentation.ui.theme.colorOutlinedTextBorder
+import com.devtools.wordbridge.presentation.ui.theme.colorOutlinedTextBorderDeActive
 import com.devtools.wordbridge.presentation.ui.theme.animationPairBouncyScaleDown
 import com.devtools.wordbridge.presentation.ui.theme.presetSmoothExpand
+import com.devtools.wordbridge.presentation.ui.theme.shake4WayAnimation
+import com.devtools.wordbridge.presentation.ui.theme.shakeRandomAnimation
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
@@ -75,10 +88,10 @@ private fun SwipeBackground(dismissDirection: SwipeToDismissBoxValue) {
         Modifier
             .fillMaxSize()
             .padding(vertical = 8.dp)
-            .background(color = ColorOutlinedTextBorder.copy(alpha = 0.5f), shape = RoundedCornerShape(16.dp))
+            .background(color = colorOutlinedTextBorder().copy(alpha = 0.5f), shape = RoundedCornerShape(10.dp))
             .border(
-                BorderStroke(0.1.dp, color = color), // ring thickness & color
-                shape = RoundedCornerShape(16.dp)
+                BorderStroke(0.9.dp, color = color), // ring thickness & color
+                shape = RoundedCornerShape(10.dp)
             ),
         contentAlignment = alignment
     ) {
@@ -89,7 +102,7 @@ private fun SwipeBackground(dismissDirection: SwipeToDismissBoxValue) {
                 SwipeToDismissBoxValue.EndToStart -> "Fav"
                 else -> ""
             },
-            color = ColorOutlinedTextBorderDeActive
+            color = colorOutlinedTextBorderDeActive()
         )
     }
 }
@@ -98,11 +111,21 @@ private fun SwipeBackground(dismissDirection: SwipeToDismissBoxValue) {
 private fun WordCard(
     word: Word,
     isExpanded: Boolean,
+    isSelected: Boolean,
     onSingleClick: () -> Unit,
     onDoubleClick: () -> Unit,
     onLongPress: () -> Unit,
     onClickFavourite: (Int, Boolean) -> Unit,
 ) {
+
+    val backgroundColor =
+        if (isSelected) colorItemBackground().copy(alpha = 0.3f) // or some highlight
+        else colorItemBackground()
+
+    // 👇 only run animation if selected
+    val (shakeX, shakeY) = shake4WayAnimation(trigger = isSelected) {}
+//    val (shakeX, shakeY) = shakeRandomAnimation(trigger = isSelected) {}
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -116,7 +139,8 @@ private fun WordCard(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = 4.5.dp, horizontal = 0.5.dp)
+                    .offset(x = if (isSelected) shakeX.dp else 0.dp, y = if (isSelected) shakeY.dp else 0.dp)
                     .align(Alignment.Center)   // center of box
                     .pointerInput(Unit) {
                         detectTapGestures(
@@ -125,7 +149,8 @@ private fun WordCard(
                             onLongPress = { onLongPress() }
                         )
                     },
-                colors = CardDefaults.cardColors(containerColor = ColorItemBackground)
+                colors = CardDefaults.cardColors(containerColor = backgroundColor),
+                shape = RoundedCornerShape(10.dp)
             ) {
                 val horizontalArrangement = Arrangement.SpaceBetween
                 Column(Modifier
@@ -176,7 +201,7 @@ private fun WordCard(
                         Column(Modifier.fillMaxWidth()) {
                             DottedHorizontalDivider(
                                 modifier = Modifier.height(18.dp).padding(horizontal = 0.dp),
-                                color = ColorDividerSeparator_1.copy(alpha = 0.5f),
+                                color = colorDividerSeparator_1().copy(alpha = 0.5f),
                                 thickness = 0.7.dp,
                                 dashLength = 6f,
                                 gapLength = 6f
@@ -204,16 +229,30 @@ private fun WordCard(
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd) // ⬅️ key line
-                .offset(x = (-8).dp, y = (-4).dp)
+                .offset(x = (-8).dp, y = (-0.05f).dp)
                 .background(Color.Transparent, shape = CircleShape)
                 .size(24.dp)
                 .clip(CircleShape)
                 .clickable (
                     interactionSource = remember { MutableInteractionSource() },
                     indication = LocalIndication.current,
-                    onClick = {onClickFavourite(word.id, !word.isFavorite)},
+                    onClick = { onClickFavourite(word.id, !word.isFavorite) },
             )
         ){
+            val scale by animateFloatAsState(
+                targetValue = if (word.isFavorite) 1.2f else 1f, // slightly larger when favorite
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = FastOutSlowInEasing
+                )
+            )
+
+            // Color animation for tint
+            val tintColor by animateColorAsState(
+                targetValue = if (word.isFavorite) Color.Yellow.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.15f),
+                animationSpec = tween(durationMillis = 300)
+            )
+
             Image(
 //                        painter = rememberVectorPainter(image = Icons.Default.Search),
                 painter = painterResource(
@@ -225,38 +264,14 @@ private fun WordCard(
                 modifier = Modifier
                     .size(width = 64.dp, height = 32.dp)
                     .background(color = Color.Transparent)
+                    .graphicsLayer { scaleX = scale; scaleY = scale }
                     .padding(4.dp),
-//                        .border(width = 1.dp, color = ColorOutlinedTextBorderDeActive, shape = RoundedCornerShape(8.dp))
-                    colorFilter = ColorFilter.tint(
-                        if (word.isFavorite) Color.Yellow.copy(alpha = 1f) else Color.Transparent.copy(alpha = 0.0f))
+//                        .border(width = 1.dp, color = colorOutlinedTextBorderDeActive(), shape = RoundedCornerShape(8.dp))
+                    colorFilter = ColorFilter.tint(tintColor)
+//                    colorFilter = ColorFilter.tint(if (word.isFavorite) Color.Yellow.copy(alpha = 1f) else Color.Transparent.copy(alpha = 0.0f))
             )
         }
 
-    }
-}
-
-@Composable
-private fun WordActionsDialog(
-    show: Boolean,
-    word: Word,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-    onToggleFav: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    if (show) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            confirmButton = {},
-            text = {
-                Column {
-                    TextButton(onClick = { onEdit(); onDismiss() }) { Text("Edit") }
-                    TextButton(onClick = { onDelete(); onDismiss() }) { Text("Delete") }
-                    TextButton(onClick = { onToggleFav(); onDismiss() }) { Text("Favourite / Unfavourite") }
-                    TextButton(onClick = onDismiss) { Text("Close") }
-                }
-            }
-        )
     }
 }
 
@@ -267,9 +282,9 @@ fun WordItemRow(
     isExpanded: Boolean,
     onAction: (Action) -> Unit,
     enableSwipeStartToEnd: Boolean = true,
-    enableSwipeEndToStart: Boolean = true
+    enableSwipeEndToStart: Boolean = true,
+    isSelected: Boolean = false
 ) {
-    var showDialog by remember { mutableStateOf(false) }
     val dismissState = rememberSwipeToDismissBoxState()
 
     // one Boolean per row, initialised from word.isFavorite
@@ -326,36 +341,17 @@ fun WordItemRow(
                         onAction(UiActions.DoubleClick(payload = word))
                     },
                     onLongPress = {
-                        showDialog = true
                         onAction(UiActions.LongPress(payload = word))
                     },
                     onClickFavourite = { id, fav ->
                         favState = fav
                         //onAction(WordAction.ToggleFavourite(id, fav))
                         onAction(DomainActions.ToggleFavouriteWord(word.id, fav))
-                    }
+                    },
+                    isSelected = isSelected
 
                 )
 //            }
         }
     )
-
-    /*WordActionsDialog(
-        show = showDialog,
-        word = word.copy(isFavorite = favState),
-        onEdit = {
-            //onAction(WordAction.Edit(word))
-            onAction(UiAction.NavigateToScreen(data = word))
-         },
-        onDelete = {
-            //onAction(WordAction.Delete(word))
-            onAction(DbAction.DeleteWord(word))
-        },
-        onToggleFav = {
-            val newValue = !favState
-            favState = newValue
-            //onAction(WordAction.ToggleFavourite(word.id, newValue))
-        },
-        onDismiss = { showDialog = false }
-    )*/
 }

@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- Neon / Vibrant colors for light mode -->
+    <color name="purple_200">#FF9D7FFF</color>  <!-- Soft neon violet -->
+    <color name="purple_500">#FF6A5EFF</color>  <!-- Bright indigo -->
+    <color name="purple_700">#FF4B39FF</color>  <!-- Deep violet -->
+
+    <color name="teal_200">#FFFF6BC0</color>   <!-- Neon pink highlight -->
+    <color name="teal_700">#FF7AC8FF</color>   <!-- Cyan neon accent -->
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="color_selected">#FFFFFF</color>
-    <color name="color_unselected">#292D32</color>
+    <!-- Custom colors -->
+    <color name="color_selected">#FF6200EE</color>          <!-- Bright purple for selected -->
+    <color name="color_unselected">#FF292D32</color>        <!-- Dark gray for unselected -->
+    <color name="color_message_alert_background">#FFFF007F</color>  <!-- Neon magenta alert -->
+    <color name="color_error">#FFFF3D3D</color>             <!-- Vibrant red -->
+    <color name="color_warning">#FFFFD700</color>           <!-- Gold yellow -->
+    <color name="color_outlined_text_border">#FF8C8CFF</color>   <!-- Light neon border -->
+    <color name="color_item_background">#FFEFF0FF</color>   <!-- Light neon background -->
+
+    <!-- App structure colors -->
+    <color name="app_base_background">#FFF5F5FF</color>       <!-- Soft neon/light pastel background -->
+    <color name="header_background">#FFF5F5FF</color>         <!-- Bright indigo neon header -->
+    <color name="footer_background">#FFF5F5FF</color>         <!-- Pink/cyan neon footer -->
 </resources>

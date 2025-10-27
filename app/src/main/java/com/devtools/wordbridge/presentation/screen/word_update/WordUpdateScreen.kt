@@ -27,11 +27,11 @@ import com.devtools.wordbridge.domain.common.OperationStatus
 import com.devtools.wordbridge.domain.model.Word
 import com.devtools.wordbridge.presentation.screen.word_add.WordAddViewModel
 import com.devtools.wordbridge.presentation.ui.custom_ui.MessageAlert
-import com.devtools.wordbridge.presentation.ui.theme.ColorError
-import com.devtools.wordbridge.presentation.ui.theme.ColorIconBorderUnselectedItem
-import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorder
-import com.devtools.wordbridge.presentation.ui.theme.ColorSelected
-import com.devtools.wordbridge.presentation.ui.theme.ColorWarning
+import com.devtools.wordbridge.presentation.ui.theme.colorIconBorderDeactivate
+import com.devtools.wordbridge.presentation.ui.theme.colorOutlinedTextBorder
+import com.devtools.wordbridge.presentation.ui.theme.colorWarning
+import com.devtools.wordbridge.presentation.ui.theme.colorError
+import com.devtools.wordbridge.presentation.ui.theme.colorSelected
 import kotlinx.coroutines.launch
 
 @Composable
@@ -76,7 +76,7 @@ fun WordUpdateScreen(
                     val focusManager = LocalFocusManager.current
 
                     Row(modifier = Modifier.fillMaxWidth().wrapContentHeight(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Text("Update word", color = ColorOutlinedTextBorder, style = MaterialTheme.typography.headlineMedium)
+                        Text("Update word", color = colorOutlinedTextBorder(), style = MaterialTheme.typography.headlineMedium)
                         Row(modifier = Modifier.fillMaxWidth().height(33.dp), horizontalArrangement = Arrangement.End) {
 
                             Surface(
@@ -90,9 +90,9 @@ fun WordUpdateScreen(
                                     modifier = Modifier
                                         .size(width = 64.dp, height = 32.dp)
                                         .background(color = Color.Transparent)
-                                        .border(width = 1.dp, color = ColorIconBorderUnselectedItem, shape = RoundedCornerShape(8.dp))
+                                        .border(width = 1.dp, color = colorIconBorderDeactivate(), shape = RoundedCornerShape(8.dp))
                                         .padding(4.dp),
-                                    colorFilter = ColorFilter.tint(ColorIconBorderUnselectedItem)
+                                    colorFilter = ColorFilter.tint(colorIconBorderDeactivate())
                                 )
                             }
                         }
@@ -109,7 +109,7 @@ fun WordUpdateScreen(
                         label = {
                             Text(
                                 "Word",
-                                color = if (isErrorOfWord) ColorError else ColorOutlinedTextBorder
+                                color = if (isErrorOfWord) colorError() else colorOutlinedTextBorder()
                             )
                         },
                         singleLine = true,
@@ -122,18 +122,18 @@ fun WordUpdateScreen(
                             .fillMaxWidth()
                             .onFocusChanged { onFocusedOfWord = it.isFocused },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isErrorOfWord) ColorError else ColorOutlinedTextBorder,
-                            unfocusedBorderColor = if (isErrorOfWord) ColorError else ColorOutlinedTextBorder.copy(
+                            focusedBorderColor = if (isErrorOfWord) colorError() else colorOutlinedTextBorder(),
+                            unfocusedBorderColor = if (isErrorOfWord) colorError() else colorOutlinedTextBorder().copy(
                                 alpha = 0.5f
                             ),
-                            cursorColor = if (isErrorOfWord) ColorError else ColorOutlinedTextBorder,
+                            cursorColor = if (isErrorOfWord) colorError() else colorOutlinedTextBorder(),
                         )
                     )
                     if (onFocusedOfWord || isErrorOfWord) {
                         Text(
                             modifier = Modifier.padding(start = 16.dp),
                             text = "Primary word is required",
-                            color = if (isErrorOfWord) ColorError else ColorOutlinedTextBorder,
+                            color = if (isErrorOfWord) colorError() else colorOutlinedTextBorder(),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -149,7 +149,7 @@ fun WordUpdateScreen(
                         label = {
                             Text(
                                 if (onFocusedOfMeaning) "Meaning" else "Meaning (optional)",
-                                color = if (isWarningOfMeaning) ColorWarning else ColorOutlinedTextBorder
+                                color = if (isWarningOfMeaning) colorWarning() else colorOutlinedTextBorder()
                             )
                         },
                         singleLine = true,
@@ -162,11 +162,11 @@ fun WordUpdateScreen(
                             .fillMaxWidth()
                             .onFocusChanged { onFocusedOfMeaning = it.isFocused },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isWarningOfMeaning) ColorWarning else ColorOutlinedTextBorder,
-                            unfocusedBorderColor = if (isWarningOfMeaning) ColorWarning else ColorOutlinedTextBorder.copy(
+                            focusedBorderColor = if (isWarningOfMeaning) colorWarning() else colorOutlinedTextBorder(),
+                            unfocusedBorderColor = if (isWarningOfMeaning) colorWarning() else colorOutlinedTextBorder().copy(
                                 alpha = 0.5f
                             ),
-                            cursorColor = if (isWarningOfMeaning) ColorWarning else ColorOutlinedTextBorder
+                            cursorColor = if (isWarningOfMeaning) colorWarning() else colorOutlinedTextBorder()
                         )
                     )
 
@@ -182,7 +182,7 @@ fun WordUpdateScreen(
                         label = {
                             Text(
                                 "Translation",
-                                color = if (isErrorOfTranslation) ColorError else ColorOutlinedTextBorder
+                                color = if (isErrorOfTranslation) colorError() else colorOutlinedTextBorder()
                             )
                         },
                         singleLine = true,
@@ -195,18 +195,18 @@ fun WordUpdateScreen(
                             .fillMaxWidth()
                             .onFocusChanged { onFocusedOfTranslation = it.isFocused },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isErrorOfTranslation) ColorError else ColorOutlinedTextBorder,
-                            unfocusedBorderColor = if (isErrorOfTranslation) ColorError else ColorOutlinedTextBorder.copy(
+                            focusedBorderColor = if (isErrorOfTranslation) colorError() else colorOutlinedTextBorder(),
+                            unfocusedBorderColor = if (isErrorOfTranslation) colorError() else colorOutlinedTextBorder().copy(
                                 alpha = 0.5f
                             ),
-                            cursorColor = if (isErrorOfTranslation) ColorError else ColorOutlinedTextBorder
+                            cursorColor = if (isErrorOfTranslation) colorError() else colorOutlinedTextBorder()
                         )
                     )
                     if (onFocusedOfTranslation || isErrorOfTranslation) {
                         Text(
                             modifier = Modifier.padding(start = 16.dp),
                             text = "Secondary word (translation) is required",
-                            color = if (isErrorOfTranslation) ColorError else ColorOutlinedTextBorder,
+                            color = if (isErrorOfTranslation) colorError() else colorOutlinedTextBorder(),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -222,7 +222,7 @@ fun WordUpdateScreen(
                         label = {
                             Text(
                                 if (isFocusedOfPronunciation) "Pronunciation" else "Pronunciation (optional)",
-                                color = if (isWarningOfPronunciation) ColorWarning else ColorOutlinedTextBorder
+                                color = if (isWarningOfPronunciation) colorWarning() else colorOutlinedTextBorder()
                             )
                         },
                         singleLine = true,
@@ -235,11 +235,11 @@ fun WordUpdateScreen(
                             .fillMaxWidth()
                             .onFocusChanged { isFocusedOfPronunciation = it.isFocused },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isWarningOfPronunciation) ColorWarning else ColorOutlinedTextBorder,
-                            unfocusedBorderColor = if (isWarningOfPronunciation) ColorWarning else ColorOutlinedTextBorder.copy(
+                            focusedBorderColor = if (isWarningOfPronunciation) colorWarning() else colorOutlinedTextBorder(),
+                            unfocusedBorderColor = if (isWarningOfPronunciation) colorWarning() else colorOutlinedTextBorder().copy(
                                 alpha = 0.5f
                             ),
-                            cursorColor = if (isWarningOfPronunciation) ColorWarning else ColorOutlinedTextBorder
+                            cursorColor = if (isWarningOfPronunciation) colorWarning() else colorOutlinedTextBorder()
                         )
                     )
 
@@ -266,10 +266,10 @@ fun WordUpdateScreen(
                             .height(56.dp), // nice tall button
                         shape = RoundedCornerShape(12.dp), // rounded corners
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = ColorOutlinedTextBorder, // background
-                            contentColor = ColorSelected, // text/icon color
-                            disabledContainerColor = ColorOutlinedTextBorder,
-                            disabledContentColor = ColorOutlinedTextBorder
+                            containerColor = colorOutlinedTextBorder(), // background
+                            contentColor = colorSelected(), // text/icon color
+                            disabledContainerColor = colorOutlinedTextBorder(),
+                            disabledContentColor = colorOutlinedTextBorder()
                         ),
                         elevation = ButtonDefaults.buttonElevation(
                             defaultElevation = 6.dp,

@@ -15,14 +15,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.devtools.wordbridge.presentation.ui.theme.ColorMessageAlertBackground
+import com.devtools.wordbridge.presentation.ui.theme.colorMessageAlertBackground
 import kotlinx.coroutines.delay
 
 @Composable
 fun MessageAlert(
     message: String?,
     onDismiss: () -> Unit,
-    backgroundColor: Color = ColorMessageAlertBackground,
+    backgroundColor: Color = colorMessageAlertBackground(),
     textColor: Color = Color.White
 )  {
     LaunchedEffect(message) {

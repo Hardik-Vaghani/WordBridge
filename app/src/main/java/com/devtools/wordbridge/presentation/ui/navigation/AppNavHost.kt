@@ -15,10 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -107,11 +105,13 @@ fun AppNavHost() {
 
 
 @Composable
-fun RememberBottomBarScrollState(
+fun RememberScrollState(
     listState: LazyListState,
     threshold: Int = 20,
-    autoHideDelay: Long = 2500L, // 2.5s after showing
-    onVisibilityChange: (Boolean) -> Unit
+    autoHideDelay: Long = 2500L, // delay after showing
+    onVisibilityChange: (visible: Boolean) -> Unit = {},
+    onScrollDirection: (isScrollingDown: Boolean) -> Unit = {},
+    onScroll: ((firstVisibleItemIndex: Int, firstVisibleItemScrollOffset: Int) -> Unit)? = null,
 ) {
     var lastPosition by remember { mutableStateOf(0) }
     var job by remember { mutableStateOf<Job?>(null) }
@@ -120,27 +120,30 @@ fun RememberBottomBarScrollState(
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
             .collect { (index, offset) ->
-                val current = index * 1000 + offset
+                val current = index * 1000 + offset // combine index + offset for position
 
-                when {
-                    current > lastPosition + threshold -> {
-                        // Scroll up → hide
-                        onVisibilityChange(false)
-                        job?.cancel()
-                    }
-                    current < lastPosition - threshold -> {
-                        // Scroll down → show then auto-hide
-                        onVisibilityChange(true)
+                // 1️⃣ Detect scroll direction
+                if (current > lastPosition + threshold) {
+                    // Scrolling down (content moves up)
+                    onScrollDirection(false)
+                    onVisibilityChange(false) // auto-hide
+                    job?.cancel()
+                } else if (current < lastPosition - threshold) {
+                    // Scrolling up (content moves down)
+                    onScrollDirection(true)
+                    onVisibilityChange(true) // show
 
-                        job?.cancel()
-                        job = scope.launch {
-                            delay(autoHideDelay)
-                            onVisibilityChange(false) // hide again
-                        }
+                    job?.cancel()
+                    job = scope.launch {
+                        delay(autoHideDelay)
+                        onVisibilityChange(false) // auto-hide after delay
                     }
                 }
 
                 lastPosition = current
+
+                // 2️⃣ Scroll callback with current index/offset
+                onScroll?.invoke(index, offset)
             }
     }
 }

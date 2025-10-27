@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark neon/glow colors -->
+    <color name="purple_200">#FF9B5FFF</color>  <!-- Neon violet accent -->
+    <color name="purple_500">#FF5E4FD5</color>  <!-- Deep indigo primary -->
+    <color name="purple_700">#FF3700B3</color>  <!-- Dark neon indigo -->
+
+    <color name="teal_200">#FFFF7EB6</color>   <!-- Neon pink highlight -->
+    <color name="teal_700">#FF00FFFF</color>   <!-- Cyan neon glow -->
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Custom dark neon colors -->
+    <color name="color_selected">#FF9B5FFF</color>          <!-- Neon purple glow -->
+    <color name="color_unselected">#FF292D32</color>        <!-- Dark background -->
+    <color name="color_message_alert_background">#FFFF3DFF</color>  <!-- Magenta alert glow -->
+    <color name="color_error">#FFFF4D4F</color>             <!-- Red alert -->
+    <color name="color_warning">#FFFFA940</color>           <!-- Amber warning -->
+    <color name="color_outlined_text_border">#FF8C8CFF</color>   <!-- Neon border glow -->
+    <color name="color_item_background">#FF2C2F44</color>   <!-- Dark neon background -->
+
+    <!-- App structure colors -->
+    <color name="app_base_background">#FF1B1B2F</color>      <!-- Dark neon background -->
+    <color name="header_background">#FF1B1B2F</color>        <!-- Neon indigo header -->
+    <color name="footer_background">#FF1B1B2F</color>        <!-- Neon pink footer -->
+</resources>

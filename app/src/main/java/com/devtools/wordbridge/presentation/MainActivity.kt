@@ -47,7 +47,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.devtools.wordbridge.R
 import com.devtools.wordbridge.presentation.ui.navigation.AppNavHost
-import com.devtools.wordbridge.presentation.ui.theme.ColorOutlinedTextBorder
+import com.devtools.wordbridge.presentation.ui.theme.colorOutlinedTextBorder
 import com.devtools.wordbridge.presentation.ui.theme.WordBridgeTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Row(modifier = Modifier.fillMaxWidth().wrapContentHeight().background(color = Color.Gray), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
 
-        Text("Words", color = ColorOutlinedTextBorder, style = MaterialTheme.typography.headlineMedium)
+        Text("Words", color = colorOutlinedTextBorder(), style = MaterialTheme.typography.headlineMedium)
 
         Row(modifier = Modifier.fillMaxWidth().height(33.dp), horizontalArrangement = Arrangement.End) {
             val buttonWidth = 48.dp
@@ -120,7 +120,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             ) {
                 Icon(
                     imageVector = Icons.Default.Menu,
-                    tint = ColorOutlinedTextBorder,
+                    tint = colorOutlinedTextBorder(),
                     modifier = Modifier.size(24.dp),
                     contentDescription = "Menu icon"
                 )

@@ -1,10 +1,16 @@
 package com.devtools.wordbridge.presentation.ui.theme
 
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -25,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
 @Composable
@@ -206,6 +213,132 @@ fun ScaleInScaleOut(
     )
 }
 
+/**
+ * ↖  top-left
+ * ↘  bottom-right
+ * ↗  top-right
+ * ↙  bottom-left
+ * (repeat)
+ * */
+@Composable
+fun shake4WayAnimation(
+    trigger: Boolean,
+    distance: Float = 4f,     // max offset in dp
+    duration: Int = 1400,      // full cycle duration
+    content: @Composable (Modifier) -> Unit
+) : Pair<Float, Float> {
+    val infiniteTransition = rememberInfiniteTransition(label = "shake4way")
+
+    // X offset moves: 0 → -distance → +distance → +distance → -distance → loop
+    val shakeX by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = duration
+                0f at 0
+                -distance at duration / 4   // top-left
+                +distance at duration / 2   // bottom-right
+                +distance at (3 * duration / 4) // top-right
+                -distance at duration       // bottom-left
+            },
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shakeX"
+    )
+
+    // Y offset moves: 0 → -distance → +distance → -distance → +distance → loop
+    val shakeY by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = duration
+                0f at 0
+                -distance at duration / 4   // top-left
+                +distance at duration / 2   // bottom-right
+                -distance at (3 * duration / 4) // top-right
+                +distance at duration       // bottom-left
+            },
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shakeY"
+    )
+
+    val modifier = if (trigger) {
+        Modifier.offset(x = shakeX.dp, y = shakeY.dp)
+    } else {
+        Modifier // no offset if not triggered
+    }
+
+    content(modifier)
+    return shakeX to shakeY
+}
+
+@Composable
+fun shakeRandomAnimation(
+    trigger: Boolean,
+    distance: Float = 4f,
+    intervalMs: Long = 1400L,
+    content: @Composable (Modifier) -> Unit
+) : Pair<Float, Float> {
+    val x = remember { Animatable(0f) }
+    val y = remember { Animatable(0f) }
+
+    LaunchedEffect(trigger) {
+        if (trigger) {
+            while (true) {
+                val newX = if ((0..1).random() == 0) -distance else distance
+                val newY = if ((0..1).random() == 0) -distance else distance
+                x.animateTo(newX, tween(intervalMs.toInt()))
+                y.animateTo(newY, tween(intervalMs.toInt()))
+                // then swap to the opposite direction
+            }
+        } else {
+            x.snapTo(0f); y.snapTo(0f)
+        }
+    }
+
+    val modifier = Modifier.offset(x = x.value.dp, y = y.value.dp)
+    content(modifier)
+    return x.value to y.value
+}
+enum class ShakeDirection {
+    Horizontal,
+    Vertical
+}
+@Composable
+fun shake2WayAnimation(
+    trigger: Boolean,
+    initialValue: Float = -4f,     // max offset in dp
+    targetValue: Float = 4f,     // max offset in dp
+    duration: Int = 400,      // full cycle duration
+    direction: ShakeDirection = ShakeDirection.Horizontal,
+    content: @Composable (Modifier) -> Unit
+) : Float {
+
+    val infiniteTransition = rememberInfiniteTransition(label = "shake")
+    val shakeOffset by infiniteTransition.animateFloat(
+        initialValue = initialValue,
+        targetValue = targetValue,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = duration, easing = FastOutLinearInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shakeOffset"
+    )
+    val modifier = if (trigger) {
+        when (direction) {
+            ShakeDirection.Horizontal -> Modifier.offset(x = shakeOffset.dp)
+            ShakeDirection.Vertical -> Modifier.offset(y = shakeOffset.dp)
+        }
+    } else {
+        Modifier
+    }
+    content(modifier)
+
+    return shakeOffset
+}
 /**
  * ENTER ANIMATIONS
  */
